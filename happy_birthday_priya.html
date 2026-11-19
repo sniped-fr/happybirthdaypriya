@@ -1,0 +1,2884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happy Birthday, Priya</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400;1,600&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <style>
+    :root {
+      --sky-top: #070b1d;
+      --sky-mid: #101938;
+      --sky-horizon: #261d36;
+      --lantern-gold: #ffbf59;
+      --lantern-amber: #ff8c3a;
+      --cream: #fdf6e7;
+      --muted-ink: #b9c1d9;
+      --card-glass: rgba(13, 19, 42, 0.72);
+      --gold-border: rgba(255, 191, 89, 0.28);
+      --font-display: 'Cormorant Garamond', Georgia, serif;
+      --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --font-hand: 'Caveat', cursive;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #070b1d;
+      color: var(--cream);
+      font-family: var(--font-sans);
+      user-select: none;
+    }
+
+    @keyframes auroraDrift {
+      0%   { transform: translate3d(-4%, -2%, 0) scale(1); opacity: 0.55; }
+      50%  { transform: translate3d(4%, 3%, 0) scale(1.08); opacity: 0.85; }
+      100% { transform: translate3d(-4%, -2%, 0) scale(1); opacity: 0.55; }
+    }
+
+    body {
+      background:
+        radial-gradient(ellipse 95% 58% at 50% 100%, rgba(255, 140, 58, 0.28), transparent 62%),
+        radial-gradient(circle at 82% 14%, rgba(255, 226, 156, 0.18), transparent 38%),
+        radial-gradient(circle at 16% 24%, rgba(105, 138, 240, 0.22), transparent 48%),
+        linear-gradient(180deg, #050817 0%, #0e1634 52%, #241932 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: -10%;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 60% 35% at 30% 25%, rgba(96, 165, 250, 0.16), transparent 65%),
+        radial-gradient(ellipse 55% 30% at 72% 35%, rgba(255, 180, 75, 0.14), transparent 65%);
+      animation: auroraDrift 14s ease-in-out infinite;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      background: radial-gradient(circle at 50% 50%, transparent 56%, rgba(3, 5, 14, 0.58) 100%);
+    }
+
+    .font-display { font-family: var(--font-display); }
+    .font-mono-tech { font-family: var(--font-mono); }
+    .font-hand { font-family: var(--font-hand); }
+
+    #webgl-stage {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      touch-action: none;
+    }
+
+    .slides-root {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4.5rem 1.25rem 5.25rem;
+      opacity: 0;
+      transform: translateY(24px) scale(0.985);
+      pointer-events: none;
+      transition: opacity 600ms cubic-bezier(0.22, 1, 0.36, 1), transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .slide.is-active {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .slide.is-active .interactive-el {
+      pointer-events: auto;
+    }
+
+    /* Celestial lantern glass cards */
+    .lantern-card {
+      background: linear-gradient(180deg, rgba(19, 27, 58, 0.78), rgba(11, 16, 36, 0.88));
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid var(--gold-border);
+      box-shadow:
+        0 20px 46px -14px rgba(0, 0, 0, 0.75),
+        0 0 32px -14px rgba(255, 191, 89, 0.32),
+        inset 0 1px 0 rgba(255, 240, 200, 0.14);
+    }
+
+    .lantern-btn {
+      background: linear-gradient(135deg, #ffbf59 0%, #ff8c3a 100%);
+      color: #16100a;
+      box-shadow: 0 12px 28px -8px rgba(255, 140, 58, 0.55);
+    }
+    .lantern-btn:hover {
+      filter: brightness(1.07);
+    }
+
+    /* Parchment letter styling */
+    .parchment-panel {
+      background: linear-gradient(165deg, #fffaf0 0%, #f7ecd6 100%);
+      color: #2b2118;
+      border: 1px solid rgba(212, 155, 65, 0.45);
+      box-shadow:
+        0 30px 70px -16px rgba(0, 0, 0, 0.8),
+        0 0 40px -10px rgba(255, 191, 89, 0.28);
+    }
+
+    .letter-scroll::-webkit-scrollbar { width: 5px; }
+    .letter-scroll::-webkit-scrollbar-thumb {
+      background: rgba(180, 120, 45, 0.35);
+      border-radius: 9999px;
+    }
+
+    /* Polaroid 3D Flip with vintage gold corner tape */
+    .polaroid-scene { perspective: 1200px; }
+
+    .polaroid-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      transition: transform 680ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .polaroid-inner.is-flipped { transform: rotateY(180deg); }
+
+    .polaroid-face {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      border-radius: 0.4rem;
+      background: #fdf9f0;
+      color: #231c16;
+      box-shadow: 0 24px 54px -16px rgba(0, 0, 0, 0.78), 0 0 0 1px rgba(255, 232, 190, 0.35);
+    }
+
+    .polaroid-back {
+      transform: rotateY(180deg);
+      background: linear-gradient(160deg, #fffaf0, #f4e6cc);
+    }
+
+    .tape-strip {
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%) rotate(-2deg);
+      width: 72px;
+      height: 20px;
+      background: rgba(255, 206, 120, 0.42);
+      border: 1px solid rgba(255, 224, 160, 0.35);
+      backdrop-filter: blur(4px);
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    #welcome-curtain {
+      background: radial-gradient(circle at 50% 48%, rgba(16, 18, 32, 0.94), rgba(2, 3, 9, 0.99));
+      transition: background 650ms ease, opacity 1050ms cubic-bezier(0.22, 1, 0.36, 1), visibility 1050ms ease;
+    }
+    #welcome-curtain.is-lighting {
+      background: radial-gradient(circle at 50% 48%, rgba(255, 191, 89, 0.32), rgba(20, 16, 32, 0.72));
+    }
+    #welcome-curtain.is-dismissed {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    #active-polaroid {
+      transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease;
+      touch-action: pan-y;
+    }
+
+    #toast {
+      transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1), opacity 280ms ease;
+    }
+  </style>
+</head>
+<body>
+  <!-- Point 3: Dreamy Welcome Curtain for Instant Music Fade-In -->
+  <div id="welcome-curtain" class="fixed inset-0 z-50 flex flex-col items-center justify-center px-6 text-center backdrop-blur-xl">
+    <div class="mb-5 flex h-16 w-16 items-center justify-center rounded-full border border-[#ffbf59]/45 bg-[#ffbf59]/15 text-[#ffbf59] shadow-[0_0_50px_rgba(255,191,89,0.38)]">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-7 w-7 animate-pulse" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>
+    </div>
+    <p class="font-mono-tech text-[11px] uppercase tracking-[0.28em] text-[#ffbf59]/85">A Birthday Surprise For Priya</p>
+    <h2 class="font-display mt-2 text-4xl font-semibold text-[#fdf6e7] sm:text-5xl">
+      Tap to Light the Lanterns
+    </h2>
+    <p class="mt-2.5 max-w-xs text-xs leading-relaxed text-[#b9c1d9] sm:text-sm">
+      Turn your sound up and tap anywhere to begin with your song.
+    </p>
+    <button id="btn-enter-curtain" type="button" class="lantern-btn mt-7 inline-flex items-center gap-2 rounded-full px-6 py-3 text-xs font-bold tracking-wide transition active:scale-95 sm:text-sm">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      <span>Light the Lanterns</span>
+    </button>
+  </div>
+
+  <!-- Full-Viewport 3D Starlit Lantern Sky Canvas -->
+  <canvas id="webgl-stage" aria-label="Interactive 3D Lantern Sky Birthday Experience"></canvas>
+
+  <!-- Minimal Top Floating Bar -->
+  <header class="fixed inset-x-0 top-0 z-30 flex items-center justify-between gap-2 px-4 py-3.5 sm:px-7">
+    <div id="secret-unlock-trigger" class="flex items-center gap-2.5 rounded-full border border-[#ffbf59]/25 bg-[#0c1229]/75 px-3.5 py-1.5 backdrop-blur-xl">
+      <span class="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-[#ffbf59] to-[#ff8c3a] text-[#16100a]">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3.5 w-3.5" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>
+      </span>
+      <span id="top-title" class="text-xs font-semibold tracking-wide text-[#fdf6e7]">For Priya</span>
+      <span class="hidden h-3 w-px bg-white/15 sm:inline-block"></span>
+      <span id="slide-counter-label" class="hidden font-mono-tech text-[11px] text-[#ffbf59]/85 sm:inline-block">01 / 05</span>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <div class="flex items-center gap-1 rounded-full border border-[#ffbf59]/25 bg-[#0c1229]/75 p-1 backdrop-blur-xl" aria-label="3D Zoom Controls">
+        <button id="btn-zoom-out" type="button" class="flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-[#fdf6e7] transition hover:bg-white/15" aria-label="Zoom out" title="Zoom out">&minus;</button>
+        <button id="btn-zoom-in" type="button" class="flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-[#fdf6e7] transition hover:bg-white/15" aria-label="Zoom in" title="Zoom in">+</button>
+      </div>
+      <button id="btn-music-toggle" type="button" class="inline-flex items-center gap-2 rounded-full border border-[#ffbf59]/35 bg-[#0c1229]/80 px-3.5 py-1.5 text-xs font-semibold text-[#fdf6e7] backdrop-blur-xl transition hover:border-[#ffbf59] hover:bg-[#ffbf59]/15">
+        <span id="music-dot" class="h-2 w-2 rounded-full bg-[#b9c1d9]"></span>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3.5 w-3.5 text-[#ffbf59]" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        <span id="music-status-text">Play Her Song</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Non-Scrolling 5-Slide Deck -->
+  <main class="slides-root">
+    <!-- SLIDE 1: Starlit Lantern Countdown -->
+    <section id="slide-0" class="slide is-active" aria-label="Birthday Countdown">
+      <div class="interactive-el mx-auto flex w-full max-w-2xl flex-col items-center text-center">
+        <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-[#ffbf59]/35 bg-[#0c1229]/75 px-4 py-1.5 text-xs font-medium text-[#ffda94] backdrop-blur-xl">
+          <span class="h-2 w-2 animate-pulse rounded-full bg-[#ffbf59]"></span>
+          <span id="countdown-badge">A Lantern Sky Waiting For Midnight</span>
+        </div>
+
+        <h1 class="font-display text-4xl font-semibold tracking-tight text-[#fdf6e7] drop-shadow-lg sm:text-6xl">
+          Happy Birthday Mur Kolija, <span id="timer-gf-name" class="italic text-[#ffbf59]">Priya</span>
+        </h1>
+        <p class="mt-2.5 max-w-md text-xs leading-relaxed text-[#b9c1d9] sm:text-sm">
+          Tap anywhere for music. When the clock hits 12 am of 14th Dec your birthday gift unlocks!
+        </p>
+
+        <!-- Lantern Glass Countdown Grid -->
+        <div class="mt-7 grid w-full max-w-lg grid-cols-4 gap-2.5 sm:gap-4">
+          <div class="lantern-card flex flex-col items-center rounded-2xl px-2 py-4 sm:py-5">
+            <span id="cd-days" class="font-display text-4xl font-semibold tracking-tight text-[#fdf6e7] sm:text-5xl">00</span>
+            <span class="mt-1 font-mono-tech text-[10px] uppercase tracking-widest text-[#ffbf59]/80">Days</span>
+          </div>
+          <div class="lantern-card flex flex-col items-center rounded-2xl px-2 py-4 sm:py-5">
+            <span id="cd-hours" class="font-display text-4xl font-semibold tracking-tight text-[#fdf6e7] sm:text-5xl">00</span>
+            <span class="mt-1 font-mono-tech text-[10px] uppercase tracking-widest text-[#ffbf59]/80">Hours</span>
+          </div>
+          <div class="lantern-card flex flex-col items-center rounded-2xl px-2 py-4 sm:py-5">
+            <span id="cd-mins" class="font-display text-4xl font-semibold tracking-tight text-[#fdf6e7] sm:text-5xl">00</span>
+            <span class="mt-1 font-mono-tech text-[10px] uppercase tracking-widest text-[#ffbf59]/80">Mins</span>
+          </div>
+          <div class="lantern-card flex flex-col items-center rounded-2xl px-2 py-4 sm:py-5">
+            <span id="cd-secs" class="font-display text-4xl font-semibold tracking-tight text-[#ffbf59] sm:text-5xl">00</span>
+            <span class="mt-1 font-mono-tech text-[10px] uppercase tracking-widest text-[#ffbf59]/80">Secs</span>
+          </div>
+        </div>
+
+        <div id="birthday-open-wrap" class="mt-7 hidden flex-wrap items-center justify-center gap-2.5">
+          <button id="btn-birthday-enter" type="button" class="lantern-btn inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-xs font-bold transition active:scale-95 sm:text-sm">
+            <span>Open Your Birthday Surprise</span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </button>
+        </div>
+
+        <p id="timer-target-label" class="mt-4 font-mono-tech text-[11px] text-[#b9c1d9]/80">
+          December 14, 2026
+        </p>
+      </div>
+    </section>
+
+    <!-- SLIDE 2: 3D Celestial Birthday Cake & Candles -->
+    <section id="slide-1" class="slide justify-between" aria-label="3D Birthday Cake">
+      <div class="interactive-el mt-2 text-center">
+        <div class="mb-2 inline-flex items-center gap-2 rounded-full border border-[#ffbf59]/35 bg-[#0c1229]/75 px-3.5 py-1 text-[11px] font-medium text-[#ffda94] backdrop-blur-xl">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3.5 w-3.5 text-[#ffbf59]" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+          <span>Under A Thousand Lanterns</span>
+        </div>
+        <h2 class="font-display text-3xl font-semibold text-[#fdf6e7] drop-shadow sm:text-5xl">
+          Happy Birthday, <span id="cake-gf-name" class="italic text-[#ffbf59]">Priya</span>
+        </h2>
+        <p class="mt-1 text-xs text-[#b9c1d9] sm:text-sm">
+          Drag to spin &bull; Pinch or scroll to zoom &bull; Tap candles or blow them out!
+        </p>
+      </div>
+
+      <div class="pointer-events-none flex-1"></div>
+
+      <div class="interactive-el mb-2 flex flex-wrap items-center justify-center gap-2.5">
+        <button id="btn-blow-candles" type="button" class="lantern-btn inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-xs font-bold transition active:scale-95 sm:text-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/></svg>
+          <span id="blow-btn-text">Blow Out Candles (7/7)</span>
+        </button>
+        <button id="btn-cake-confetti" type="button" class="inline-flex items-center gap-2 rounded-full border border-[#ffbf59]/30 bg-[#0c1229]/80 px-4 py-2.5 text-xs font-semibold text-[#ffda94] backdrop-blur-xl transition hover:border-[#ffbf59] active:scale-95 sm:text-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>
+          <span>Golden Sparkles</span>
+        </button>
+        <button id="btn-to-box" type="button" class="hidden inline-flex items-center gap-2 rounded-full border border-[#ffbf59]/45 bg-[#ffbf59]/20 px-4 py-2.5 text-xs font-semibold text-[#fdf6e7] backdrop-blur-xl transition hover:bg-[#ffbf59]/30 active:scale-95 sm:text-sm">
+          <span>Open Your Keepsake Box</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: 3D Keepsake Gift Box & Parchment Letter -->
+    <section id="slide-2" class="slide justify-between" aria-label="3D Keepsake Box and Letter">
+      <div class="interactive-el mt-2 text-center">
+        <div class="mb-2 inline-flex items-center gap-2 rounded-full border border-[#ffbf59]/35 bg-[#0c1229]/75 px-3.5 py-1 text-[11px] font-medium text-[#ffda94] backdrop-blur-xl">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3.5 w-3.5 text-[#ffbf59]" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/></svg>
+          <span>Sealed In Moonlight</span>
+        </div>
+        <h2 class="font-display text-3xl font-semibold text-[#fdf6e7] sm:text-5xl">
+          Your Birthday Keepsake
+        </h2>
+        <p class="mt-1 text-xs text-[#b9c1d9] sm:text-sm">
+          Touch anywhere on the screen to lift the lid and read your letter.
+        </p>
+      </div>
+
+      <!-- Warm Parchment Letter Overlay -->
+      <div id="main-letter-card" class="interactive-el pointer-events-none mx-auto my-auto w-full max-w-xl scale-95 opacity-0 transition-all duration-500">
+        <div class="parchment-panel relative rounded-2xl p-6 sm:p-8">
+          <div class="mb-4 flex items-center justify-between border-b border-[#d49b41]/25 pb-3">
+            <div class="flex items-center gap-2.5">
+              <span class="flex h-9 w-9 items-center justify-center rounded-full bg-[#ffbf59]/25 text-[#9c5a14]">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><path d="M21.2 8.4c.5.38.8.97.8 1.6v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V10a2 2 0 0 1 .8-1.6l8-6a2 2 0 0 1 2.4 0l8 6Z"/><path d="m22 10-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 10"/></svg>
+              </span>
+              <div>
+                <h3 id="main-letter-heading" class="font-display text-2xl font-bold text-[#2b2118]">Dearest Priya,</h3>
+                <p class="font-mono-tech text-[10px] uppercase tracking-widest text-[#9c5a14]">December 14</p>
+              </div>
+            </div>
+            <button id="btn-close-letter" type="button" class="rounded-full border border-[#2b2118]/15 p-2 text-[#6b5642] transition hover:bg-[#2b2118]/10 hover:text-[#2b2118]" aria-label="Close letter">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+          </div>
+          <div id="main-letter-body" class="letter-scroll font-display max-h-[38vh] space-y-3 overflow-y-auto pr-2 text-lg leading-relaxed text-[#382b1e]">
+            <!-- Populated from CONFIG -->
+          </div>
+          <div class="mt-5 flex items-center justify-between border-t border-[#d49b41]/25 pt-3.5">
+            <span id="main-letter-sign" class="font-hand text-2xl text-[#9c5a14]">Yours Forever</span>
+            <button id="btn-to-balloons" type="button" class="lantern-btn inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold transition">
+              <span>Pop Sky Balloons</span>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3.5 w-3.5" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="interactive-el mb-2 flex items-center justify-center">
+        <button id="btn-toggle-box" type="button" class="lantern-btn inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-xs font-bold transition active:scale-95 sm:text-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/></svg>
+          <span id="box-btn-text">Open Keepsake Box</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- SLIDE 4: Pop 6 Spaced 3D Balloons to Reveal Small Love Letters -->
+    <section id="slide-3" class="slide justify-between" aria-label="Pop Balloons For Love Letters">
+      <div class="interactive-el mt-2 text-center">
+        <div class="mb-2 inline-flex items-center gap-2 rounded-full border border-[#ffbf59]/35 bg-[#0c1229]/75 px-3.5 py-1 text-[11px] font-medium text-[#ffda94] backdrop-blur-xl">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3.5 w-3.5 text-[#ffbf59]" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>
+          <span id="notes-progress">0 of 6 Balloons Popped</span>
+        </div>
+        <h2 class="font-display text-3xl font-semibold text-[#fdf6e7] drop-shadow sm:text-5xl">
+          Pop A Wishing Balloon
+        </h2>
+        <p class="mt-1 text-xs text-[#b9c1d9] sm:text-sm">
+          Tap any floating balloon in the lantern sky to reveal a hidden love note.
+        </p>
+      </div>
+
+      <div class="pointer-events-none flex-1"></div>
+
+      <div class="interactive-el mb-2 flex flex-col items-center gap-2.5">
+        <div id="popped-letters-tray" class="flex max-w-xl flex-wrap items-center justify-center gap-1.5"></div>
+
+        <div class="flex flex-wrap items-center justify-center gap-2">
+          <button id="btn-reset-balloons" type="button" class="hidden inline-flex items-center gap-1.5 rounded-full border border-[#ffbf59]/30 bg-[#0c1229]/80 px-4 py-2 text-xs font-semibold text-[#ffda94] backdrop-blur-xl transition hover:border-[#ffbf59] active:scale-95">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3.5 w-3.5" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            <span>Refill Balloons</span>
+          </button>
+          <button id="btn-to-polaroids" type="button" class="lantern-btn inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-xs font-bold transition active:scale-95 sm:text-sm">
+            <span>Next: Our Polaroids</span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 5: Vintage Lantern-Lit Polaroid Memories -->
+    <section id="slide-4" class="slide" aria-label="Polaroid Memories">
+      <div class="interactive-el mx-auto flex w-full max-w-5xl flex-col items-center">
+        <div class="mb-4 flex w-full flex-col items-center justify-between gap-2 text-center sm:flex-row sm:text-left">
+          <div>
+            <div class="mb-1 inline-flex items-center gap-2 rounded-full border border-[#ffbf59]/35 bg-[#0c1229]/75 px-3 py-1 text-[11px] font-medium text-[#ffda94] backdrop-blur-xl">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3.5 w-3.5 text-[#ffbf59]" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+              <span>Starlit Scrapbook</span>
+            </div>
+            <h2 class="font-display text-3xl font-semibold text-[#fdf6e7] sm:text-4xl">
+              Moments Worth Keeping
+            </h2>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-center gap-2">
+            <button id="btn-open-wish-modal" type="button" class="lantern-btn inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition active:scale-95">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3.5 w-3.5" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+              <span>Release a Wish Lantern</span>
+            </button>
+            <div class="flex items-center rounded-full border border-[#ffbf59]/30 bg-[#0c1229]/80 p-1 backdrop-blur-xl">
+              <button id="btn-view-deck" type="button" class="rounded-full bg-[#ffbf59] px-3.5 py-1 text-xs font-bold text-[#16100a] transition">Deck</button>
+              <button id="btn-view-wall" type="button" class="rounded-full px-3.5 py-1 text-xs font-semibold text-[#b9c1d9] transition hover:text-white">Wall</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Deck View -->
+        <div id="polaroid-deck-view" class="flex w-full flex-col items-center">
+          <div class="relative flex h-[340px] w-full max-w-md items-center justify-center sm:h-[375px]">
+            <div class="pointer-events-none absolute h-[318px] w-[255px] -rotate-6 rounded-md bg-[#fdf9f0]/75 shadow-xl sm:h-[348px] sm:w-[280px]"></div>
+            <div class="pointer-events-none absolute h-[318px] w-[255px] rotate-6 rounded-md bg-[#fdf9f0]/85 shadow-xl sm:h-[348px] sm:w-[280px]"></div>
+
+            <div id="active-polaroid" class="polaroid-scene relative z-10 h-[325px] w-[260px] cursor-pointer sm:h-[355px] sm:w-[285px]">
+              <div class="tape-strip" aria-hidden="true"></div>
+              <div id="polaroid-inner" class="polaroid-inner">
+                <div class="polaroid-face flex flex-col p-3.5 pb-4">
+                  <div id="polaroid-photo-frame" class="relative flex-1 overflow-hidden rounded-sm bg-[#121933]"></div>
+                  <div class="mt-3 flex items-end justify-between gap-2">
+                    <p id="polaroid-caption" class="font-hand text-2xl leading-none text-[#231c16]">Caption</p>
+                    <span id="polaroid-date" class="font-mono-tech text-[10px] text-[#7a6855]">Date</span>
+                  </div>
+                </div>
+                <div class="polaroid-face polaroid-back flex flex-col items-center justify-between p-6 text-center">
+                  <span class="font-mono-tech text-[10px] uppercase tracking-widest text-[#9c5a14]">Written On The Back</span>
+                  <p id="polaroid-back-note" class="font-display text-lg italic leading-relaxed text-[#2b2118]">Note</p>
+                  <span class="inline-flex items-center gap-1.5 font-hand text-xl text-[#9c5a14]">Tap to flip back <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#c92d6a" class="h-4 w-4 animate-pulse" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-3 flex items-center gap-3">
+            <button id="btn-pol-prev" type="button" class="flex h-9 w-9 items-center justify-center rounded-full border border-[#ffbf59]/30 bg-[#0c1229]/85 text-[#fdf6e7] transition hover:border-[#ffbf59]" aria-label="Previous polaroid">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <button id="btn-pol-flip" type="button" class="inline-flex items-center gap-1.5 rounded-full border border-[#ffbf59]/30 bg-[#0c1229]/85 px-4 py-2 text-xs font-semibold text-[#ffda94] transition hover:border-[#ffbf59]">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3.5 w-3.5" aria-hidden="true"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+              <span>Flip For Note</span>
+            </button>
+            <span id="pol-counter" class="font-mono-tech text-xs text-[#b9c1d9]">1 / 6</span>
+            <button id="btn-pol-next" type="button" class="flex h-9 w-9 items-center justify-center rounded-full border border-[#ffbf59]/30 bg-[#0c1229]/85 text-[#fdf6e7] transition hover:border-[#ffbf59]" aria-label="Next polaroid">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+          </div>
+          <p class="mt-2 font-mono-tech text-[10px] tracking-wide text-[#b9c1d9]/75">Swipe left or right &bull; Tap photo to flip</p>
+        </div>
+
+        <!-- Wall View -->
+        <div id="polaroid-wall-view" class="hidden grid w-full max-w-4xl grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Fixed Bottom Slide Navigation -->
+  <nav id="slide-nav-dock" class="fixed inset-x-0 bottom-4 z-30 hidden justify-center px-4" aria-label="Slide Navigation">
+    <div class="flex items-center gap-2 rounded-full border border-[#ffbf59]/25 bg-[#0c1229]/85 px-3 py-2 shadow-2xl backdrop-blur-xl">
+      <button id="btn-prev-slide" type="button" class="flex h-8 w-8 items-center justify-center rounded-full text-[#fdf6e7] transition hover:bg-white/10 disabled:opacity-30" aria-label="Previous slide">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+
+      <div id="slide-dots" class="flex items-center gap-1.5 px-1">
+        <button type="button" data-slide="0" class="slide-dot h-2.5 w-7 rounded-full bg-[#ffbf59] transition-all" title="Countdown"></button>
+        <button type="button" data-slide="1" class="slide-dot h-2.5 w-2.5 rounded-full bg-white/25 transition-all hover:bg-white/50" title="3D Cake"></button>
+        <button type="button" data-slide="2" class="slide-dot h-2.5 w-2.5 rounded-full bg-white/25 transition-all hover:bg-white/50" title="Keepsake Box"></button>
+        <button type="button" data-slide="3" class="slide-dot h-2.5 w-2.5 rounded-full bg-white/25 transition-all hover:bg-white/50" title="Pop Balloons"></button>
+        <button type="button" data-slide="4" class="slide-dot h-2.5 w-2.5 rounded-full bg-white/25 transition-all hover:bg-white/50" title="Polaroids"></button>
+      </div>
+
+      <button id="btn-next-slide" type="button" class="flex h-8 w-8 items-center justify-center rounded-full text-[#fdf6e7] transition hover:bg-white/10 disabled:opacity-30" aria-label="Next slide">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Popped Balloon Love Note Parchment Modal -->
+  <div id="note-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-[#040712]/75 p-4 backdrop-blur-md">
+    <div class="parchment-panel relative w-full max-w-md rounded-2xl p-6 sm:p-7">
+      <div class="mb-3 flex items-center justify-between">
+        <span id="modal-note-tag" class="rounded-full bg-[#ffbf59]/25 px-3 py-1 font-mono-tech text-[10px] font-semibold uppercase tracking-wider text-[#9c5a14]">Wish Note</span>
+        <button id="btn-close-note-modal" type="button" class="rounded-full border border-[#2b2118]/15 p-1.5 text-[#6b5642] transition hover:bg-[#2b2118]/10 hover:text-[#2b2118]" aria-label="Close note">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <h3 id="modal-note-title" class="font-display text-2xl font-bold text-[#2b2118]">Note Title</h3>
+      <p id="modal-note-body" class="font-display mt-3 text-lg leading-relaxed text-[#382b1e]">Note body</p>
+      <div class="mt-6 flex items-center justify-between border-t border-[#d49b41]/25 pt-4">
+        <span id="modal-note-sign" class="font-hand text-2xl text-[#9c5a14]">Yours Forever</span>
+        <button id="btn-next-note" type="button" class="lantern-btn inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-bold transition">
+          <span>Pop Another Balloon</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3.5 w-3.5" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Point 4: Release a Wish Lantern Modal -->
+  <div id="wish-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-[#040712]/78 p-4 backdrop-blur-md">
+    <div class="lantern-card relative w-full max-w-md rounded-2xl p-6 text-center sm:p-7">
+      <button id="btn-close-wish-modal" type="button" class="absolute top-4 right-4 rounded-full border border-white/15 p-1.5 text-[#b9c1d9] transition hover:bg-white/10 hover:text-white" aria-label="Close wish lantern dialog">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+      <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#ffbf59]/20 text-[#ffbf59]">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+      </div>
+      <h3 class="font-display text-3xl font-semibold text-[#fdf6e7]">Release a Wish Lantern</h3>
+      <p class="mt-1 text-xs text-[#b9c1d9]">Write a birthday wish and send your own glowing lantern up into the night sky.</p>
+      <form id="wish-lantern-form" class="mt-4 space-y-3 text-left">
+        <textarea id="wish-lantern-input" rows="3" maxlength="160" required placeholder="Type your birthday wish here..." class="w-full resize-none rounded-xl border border-[#ffbf59]/30 bg-[#070b1d]/80 px-3.5 py-2.5 text-sm text-[#fdf6e7] placeholder-[#b9c1d9]/50 outline-none transition focus:border-[#ffbf59]"></textarea>
+        <button type="submit" class="lantern-btn inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-2.5 text-xs font-bold transition active:scale-95 sm:text-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>
+          <span>Release Into The Sky</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="pointer-events-none fixed right-5 bottom-20 z-50 translate-y-6 rounded-full border border-[#ffbf59]/45 bg-[#0c1229]/95 px-4 py-2 text-xs font-semibold text-[#ffda94] opacity-0 shadow-2xl backdrop-blur-md">
+    Ready
+  </div>
+
+  <audio id="fav-audio" loop preload="auto"></audio>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // =========================================================================
+      // EASY PERSONALIZATION CONFIG — EDIT EVERYTHING FOR PRIYA HERE!
+      // =========================================================================
+      const CONFIG = {
+        girlfriendName: 'Priya',
+        senderName: 'Yours Forever - Ritu',
+        birthdayDateISO: '2026-12-14T00:00:00',
+        secretPreviewKey: 'ritu14', // Secret URL param (?preview=ritu14) or tap 'For Priya' 5 times
+
+        // EMAIL FORWARDER FOR PRIYA'S WISH LANTERN (Free, zero backend):
+        // Option A (Web3Forms): Get a free key at https://web3forms.com and paste it below:
+        web3formsAccessKey: '',
+        // Option B (Formspree): Or paste a Formspree endpoint like "https://formspree.io/f/yourid":
+        wishEmailEndpoint: 'https://formspree.io/f/mppdlnqa',
+
+        // Paste a direct .mp3 / .ogg / .wav URL to her favorite song!
+        // Leave "" to play the built-in gentle starlight harp melody automatically.
+        favoriteSongUrl: 'https://www.image2url.com/r2/default/audio/1795112755291-35728e3f-6bbb-4de2-add4-1019a5072141.mp3',
+
+        mainBirthdayLetter: [
+          'Happy Birthday to the brightest light in my world full of darkness. tumar lgt jiman time spend korilu was the most beautiful time of my life.',
+          'Thank you for your smile,the love you gave me, your care for me, for me your the most perfect women in my world theres no one better than you nor anyone can be that is why i love you so much my baby.',
+          'May this birthday be your greatest may you have that beautiful smile of yours forever may we stay together forever i hope you like this small gift by me i spent my time making and again HAAPPPYYY BIRTHHDAYYYY DAYYYY MY LOVEEEE!!!'
+        ],
+
+        smallLoveLetters: [
+          {
+            tag: 'Lantern #1',
+            title: 'My Favorite Thing About You',
+            body: 'Your smile, how your eyes shrink when you smile ufff my heart babe.....'
+          },
+          {
+            tag: 'Lantern #2',
+            title: 'You Feel Like Home',
+            body: 'even when my whole day gets off in a bad mood the sec moi tumar lgt kotha patu it just lits up like your my home my safe place......'
+          },
+          {
+            tag: 'Lantern #3',
+            title: 'Always In Your Corner',
+            body: 'even when your whole world is dark i may not be able to lit it up but i will stand with you in the dark ill stand with you in ur every decision and support you and always respect you.'
+          },
+          {
+            tag: 'Lantern #4',
+            title: 'For Tired Evenings',
+            body: 'you do not have to handle everything alone if we share our smile together we share our sad moments together too.. you are the most deserving women of my love never forget how loved and cherished you areee mur kolijaaa...'
+          },
+          {
+            tag: 'Lantern #5',
+            title: 'My adorement for you',
+            body: 'like everything i adore you its like i feel like i finally found my person yes shes the right one and yes i devote my whole heart to her like she is my little babyy.'
+          },
+          {
+            tag: 'Lantern #6',
+            title: 'This Year Is Yours',
+            body: 'May every candle you blow today grant you joy, happiness, long life, and prosperity in your life may the years ahead be calm for you may you live your lifeee and enjoyyy ittt!! dont forget to smile my love hehehe'
+          }
+        ],
+
+        // Slide 5: Polaroids — PASTE YOUR PHOTO URLs INTO `url: "https://..."` BELOW!
+        polaroids: [
+          {
+            url: 'https://i.imgur.com/yNMKlqr.png',
+            caption: 'My Favorite Smile',
+            date: 'Memory 01',
+            note: 'The moment I realized how lucky I am to have you in my life.',
+            gradient: 'linear-gradient(135deg, #1b2854 0%, #c87b3c 70%, #ffbf59 100%)'
+          },
+          {
+            url: 'https://i.imgur.com/OSGNJJj.png',
+            caption: 'Artistry?',
+            date: 'Memory 02',
+            note: 'Do you remember the moment you were making matching art in our hand?.',
+            gradient: 'linear-gradient(135deg, #2d1f47 0%, #e07a5f 65%, #ffcf75 100%)'
+          },
+          {
+            url: 'https://i.imgur.com/u0tbrIh.png',
+            caption: 'Best Day Ever',
+            date: 'Memory 03',
+            note: 'Still smiling about this day every single time it crosses my mind.',
+            gradient: 'linear-gradient(135deg, #132245 0%, #4b6cb7 60%, #ffbf59 100%)'
+          },
+          {
+            url: 'https://i.imgur.com/2dsKzPl.png',
+            caption: 'Where it all started',
+            date: 'Memory 04',
+            note: 'first pic of us together.',
+            gradient: 'linear-gradient(135deg, #0f172a 0%, #312e81 60%, #f59e0b 100%)'
+          },
+          {
+            url: 'https://i.imgur.com/Uuhd6fX.png',
+            caption: 'Remember the day?',
+            date: 'Memory 05',
+            note: 'we were holding hands running together in that rain it felt like my inner child came back i felt live...',
+            gradient: 'linear-gradient(135deg, #1f2a4c 0%, #b45309 65%, #fde68a 100%)'
+          },
+          {
+            url: 'https://i.imgur.com/zhmxnC3.png',
+            caption: 'I need more',
+            date: 'Dec 14',
+            note: 'Happy Birthday my love make sure to click more photos and give them all to me hehehe',
+            gradient: 'linear-gradient(135deg, #182348 0%, #d97706 62%, #fef3c7 100%)'
+          }
+        ]
+      };
+
+      const state = {
+        currentSlide: 0,
+        totalSlides: 5,
+        targetTimestamp: new Date(CONFIG.birthdayDateISO).getTime(),
+        timerUnlocked: false,
+        candlesLit: [true, true, true, true, true, true, true],
+        boxOpen: false,
+        openedNotes: new Set(),
+        polaroidIdx: 0,
+        polaroidFlipped: false,
+        polaroidView: 'deck',
+        musicPlaying: false,
+        audioStartedOnce: false
+      };
+
+      // =========================================================================
+      // Toast & Golden Sparkler Confetti
+      // =========================================================================
+      let toastTimer = null;
+      function showToast(msg) {
+        const el = document.getElementById('toast');
+        if (!el) return;
+        el.textContent = msg;
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(0)';
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          el.style.opacity = '0';
+          el.style.transform = 'translateY(24px)';
+        }, 2600);
+      }
+
+      function fireLanternConfetti(grand) {
+        if (typeof confetti !== 'function') return;
+        const colors = ['#ffbf59', '#ff8c3a', '#fdf6e7', '#ffe29a', '#8aa9ff'];
+        if (grand) {
+          launch3DFirework(-3.2, 3.2, -3.5);
+          setTimeout(() => launch3DFirework(3.0, 3.8, -4.5), 260);
+          setTimeout(() => launch3DFirework(0.0, 4.4, -5.2), 520);
+          confetti({ particleCount: 95, spread: 85, origin: { y: 0.62 }, colors });
+          setTimeout(() => {
+            confetti({ particleCount: 55, angle: 60, spread: 60, origin: { x: 0.08, y: 0.68 }, colors });
+            confetti({ particleCount: 55, angle: 120, spread: 60, origin: { x: 0.92, y: 0.68 }, colors });
+          }, 220);
+        } else {
+          confetti({ particleCount: 45, spread: 65, origin: { y: 0.65 }, colors });
+        }
+      }
+
+      // =========================================================================
+      // Audio Engine (Supports CONFIG.favoriteSongUrl + Starlight Harp Fallback)
+      // =========================================================================
+      let audioCtx = null;
+      let musicLoopInterval = null;
+      let melodyStep = 0;
+
+      // Dreamy pentatonic harp progression
+      const HARP_NOTES = [
+        261.63, 329.63, 392.00, 523.25, 659.25, 523.25, 392.00, 329.63,
+        220.00, 261.63, 329.63, 440.00, 523.25, 440.00, 329.63, 261.63,
+        174.61, 220.00, 261.63, 349.23, 440.00, 349.23, 261.63, 220.00,
+        196.00, 246.94, 293.66, 392.00, 493.88, 392.00, 293.66, 246.94
+      ];
+
+      function ensureAudioCtx() {
+        if (!audioCtx) {
+          const Ctx = window.AudioContext || window.webkitAudioContext;
+          if (Ctx) audioCtx = new Ctx();
+        }
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        return audioCtx;
+      }
+
+      function playSoftNote(freq, duration, vol) {
+        const ctx = ensureAudioCtx();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now);
+        gain.gain.setValueAtTime(0.0008, now);
+        gain.gain.exponentialRampToValueAtTime(vol || 0.08, now + 0.035);
+        gain.gain.exponentialRampToValueAtTime(0.0008, now + duration);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + duration + 0.04);
+      }
+
+      function playPopSfx() {
+        const ctx = ensureAudioCtx();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(360, now);
+        osc.frequency.exponentialRampToValueAtTime(92, now + 0.13);
+        gain.gain.setValueAtTime(0.13, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.15);
+      }
+
+      function playChimeSfx() {
+        playSoftNote(523.25, 0.45, 0.09);
+        setTimeout(() => playSoftNote(659.25, 0.45, 0.09), 90);
+        setTimeout(() => playSoftNote(783.99, 0.7, 0.11), 180);
+      }
+
+      function updateMusicUI() {
+        const dot = document.getElementById('music-dot');
+        const txt = document.getElementById('music-status-text');
+        if (dot) {
+          dot.className = state.musicPlaying
+            ? 'h-2 w-2 animate-pulse rounded-full bg-[#4ade80]'
+            : 'h-2 w-2 rounded-full bg-[#b9c1d9]';
+        }
+        if (txt) txt.textContent = state.musicPlaying ? 'Music Playing' : 'Play Her Song';
+      }
+
+      function startFallbackMelody() {
+        if (musicLoopInterval) clearInterval(musicLoopInterval);
+        ensureAudioCtx();
+        playSoftNote(HARP_NOTES[melodyStep % HARP_NOTES.length], 1.0, 0.07);
+        melodyStep++;
+        musicLoopInterval = setInterval(() => {
+          if (!state.musicPlaying) return;
+          playSoftNote(HARP_NOTES[melodyStep % HARP_NOTES.length], 1.05, 0.068);
+          melodyStep++;
+        }, 380);
+      }
+
+      function startMusic() {
+        if (state.musicPlaying) return;
+        state.musicPlaying = true;
+        state.audioStartedOnce = true;
+        updateMusicUI();
+
+        const audioEl = document.getElementById('fav-audio');
+        if (CONFIG.favoriteSongUrl && audioEl) {
+          if (audioEl.src !== CONFIG.favoriteSongUrl) audioEl.src = CONFIG.favoriteSongUrl;
+          audioEl.volume = 0.02;
+          const p = audioEl.play();
+          if (p && typeof p.then === 'function') {
+            p.then(() => {
+              let v = 0.02;
+              const fade = setInterval(() => {
+                if (!state.musicPlaying || audioEl.paused) { clearInterval(fade); return; }
+                v = Math.min(0.72, v + 0.035);
+                audioEl.volume = v;
+                if (v >= 0.72) clearInterval(fade);
+              }, 70);
+            }).catch(() => startFallbackMelody());
+          } else {
+            audioEl.volume = 0.72;
+          }
+        } else {
+          startFallbackMelody();
+        }
+      }
+
+      function stopMusic() {
+        state.musicPlaying = false;
+        const audioEl = document.getElementById('fav-audio');
+        if (audioEl && !audioEl.paused) audioEl.pause();
+        if (musicLoopInterval) {
+          clearInterval(musicLoopInterval);
+          musicLoopInterval = null;
+        }
+        updateMusicUI();
+      }
+
+      function toggleMusic() {
+        if (state.musicPlaying) stopMusic();
+        else startMusic();
+      }
+
+      // =========================================================================
+      // 3D Starlit Sky Lantern Festival World (Completely New 3D Concept!)
+      // =========================================================================
+      let scene, camera, renderer;
+      let lanternsGroup, moonGroup, cakeGroup, giftGroup, balloonsGroup, waterMesh, cakeOrbitRing, skyDome, horizonHills;
+      let cloudSprites = [];
+      let warmStarPoints = null;
+      let coolStarPoints = null;
+      let distantLanterns = null;
+      let shootingStars = [];
+      let fireworkBursts = [];
+      let cursorSparks = [];
+      let wishLanterns = [];
+      let boxLightBeam = null;
+      let nextMeteorAt = 0;
+      let skyLanterns = [];
+      let lanternBreeze = { x: 0, y: 0 };
+      let fireflyPoints = null;
+      let starPoints = null;
+      let candleFlames = [];
+      let candleLights = [];
+      let candleHitTargets = [];
+      let smokePuffs = [];
+      let giftLidPivot = null;
+      let giftHitTargets = [];
+      let giftGlowLight = null;
+      let balloonItems = [];
+      let balloonHitTargets = [];
+      let popParticles = [];
+
+      let camTargetRotY = 0;
+      let camTargetRotX = 0.22;
+      let camRotY = 0;
+      let camRotX = 0.22;
+      let camZoomOffset = 0;
+      let camTargetZoomOffset = 0;
+      let isDragging = false;
+      let dragPrevX = 0;
+      let dragPrevY = 0;
+      let dragMoved = false;
+      let pinchStartDist = null;
+      let pinchStartZoom = 0;
+
+      const raycaster = new THREE.Raycaster();
+      const pointer = new THREE.Vector2();
+
+      function createWarmGlowSpriteTexture() {
+        const c = document.createElement('canvas');
+        c.width = 128;
+        c.height = 128;
+        const ctx = c.getContext('2d');
+        const g = ctx.createRadialGradient(64, 64, 4, 64, 64, 60);
+        g.addColorStop(0, 'rgba(255, 244, 210, 0.9)');
+        g.addColorStop(0.32, 'rgba(255, 185, 82, 0.45)');
+        g.addColorStop(0.7, 'rgba(255, 120, 42, 0.12)');
+        g.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, 128, 128);
+        return new THREE.CanvasTexture(c);
+      }
+
+      function createCurvedLanternGeometry(scaleFactor) {
+        const sc = scaleFactor || 1;
+        // Sculpted curved Kongming / Tangled sky-lantern silhouette (open at bottom, softly domed at crown)
+        const pts = [
+          new THREE.Vector2(0.26 * sc, -0.42 * sc),
+          new THREE.Vector2(0.32 * sc, -0.24 * sc),
+          new THREE.Vector2(0.41 * sc,  0.02 * sc),
+          new THREE.Vector2(0.45 * sc,  0.24 * sc),
+          new THREE.Vector2(0.41 * sc,  0.39 * sc),
+          new THREE.Vector2(0.28 * sc,  0.46 * sc),
+          new THREE.Vector2(0.00 * sc,  0.48 * sc)
+        ];
+        return new THREE.LatheGeometry(pts, 24);
+      }
+
+      function createLanternPaperTexture(withMotifs) {
+        const c = document.createElement('canvas');
+        c.width = 256;
+        c.height = 256;
+        const ctx = c.getContext('2d');
+
+        // Deep inner-lit translucent rice-paper gradient (crown burnt amber -> glowing honey -> hot white-gold base)
+        const g = ctx.createLinearGradient(0, 0, 0, 256);
+        g.addColorStop(0.0, '#8f3412');
+        g.addColorStop(0.22, '#d45f1e');
+        g.addColorStop(0.52, '#ff9c38');
+        g.addColorStop(0.80, '#ffd978');
+        g.addColorStop(1.0, '#fffbe6');
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, 256, 256);
+
+        // Subtle rice-paper fiber grain
+        for (let i = 0; i < 240; i++) {
+          ctx.fillStyle = i % 2 === 0 ? 'rgba(255, 245, 220, 0.08)' : 'rgba(120, 42, 10, 0.06)';
+          ctx.fillRect(Math.random() * 256, Math.random() * 256, 3 + Math.random() * 8, 1);
+        }
+
+        // Delicate vertical bamboo panel seams
+        ctx.strokeStyle = 'rgba(92, 32, 10, 0.26)';
+        ctx.lineWidth = 2;
+        for (let x = 22; x < 256; x += 32) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, 256);
+          ctx.stroke();
+        }
+
+        // Subtle glowing gold star & heart motifs on hero lanterns
+        if (withMotifs) {
+          ctx.fillStyle = 'rgba(255, 248, 210, 0.42)';
+          for (let m = 0; m < 8; m++) {
+            const mx = 16 + m * 32;
+            const my = 122 + (m % 2) * 18;
+            // Tiny 4-point star
+            ctx.beginPath();
+            ctx.moveTo(mx, my - 7);
+            ctx.lineTo(mx + 2, my - 2);
+            ctx.lineTo(mx + 7, my);
+            ctx.lineTo(mx + 2, my + 2);
+            ctx.lineTo(mx, my + 7);
+            ctx.lineTo(mx - 2, my + 2);
+            ctx.lineTo(mx - 7, my);
+            ctx.lineTo(mx - 2, my - 2);
+            ctx.closePath();
+            ctx.fill();
+          }
+        }
+
+        const tex = new THREE.CanvasTexture(c);
+        tex.encoding = THREE.sRGBEncoding;
+        return tex;
+      }
+
+      function createNightStudioEnv(rendererRef) {
+        try {
+          const pmrem = new THREE.PMREMGenerator(rendererRef);
+          const envScene = new THREE.Scene();
+          envScene.background = new THREE.Color(0x0a1026);
+          const panels = [
+            { pos: [6, 7, 5],   scale: [7, 4, 0.2], color: 0xffe4a8 },
+            { pos: [-7, 4, 4],  scale: [6, 5, 0.2], color: 0xffa44a },
+            { pos: [0, -6, 3],  scale: [9, 4, 0.2], color: 0x3b5998 },
+            { pos: [5, 1, -7],  scale: [6, 6, 0.2], color: 0xffcf75 }
+          ];
+          panels.forEach((p) => {
+            const m = new THREE.Mesh(
+              new THREE.BoxGeometry(p.scale[0], p.scale[1], p.scale[2]),
+              new THREE.MeshBasicMaterial({ color: p.color })
+            );
+            m.position.set(p.pos[0], p.pos[1], p.pos[2]);
+            m.lookAt(0, 0, 0);
+            envScene.add(m);
+          });
+          const rt = pmrem.fromScene(envScene, 0.04);
+          pmrem.dispose();
+          return rt.texture;
+        } catch (e) {
+          return null;
+        }
+      }
+
+      // Upgraded Curved Rice-Paper Sky Lanterns + Crossed Bamboo Wire & Flickering Inner Flame + Distant Festival Depth
+      function buildSkyLanterns() {
+        lanternsGroup = new THREE.Group();
+        const glowTex = createWarmGlowSpriteTexture();
+        const paperTexPlain = createLanternPaperTexture(false);
+        const paperTexMotif = createLanternPaperTexture(true);
+        const sharedLanternGeo = createCurvedLanternGeometry(1);
+        const count = 42;
+
+        const rimMat = new THREE.MeshStandardMaterial({ color: 0x3b2314, roughness: 0.72, metalness: 0.3 });
+        const wireMat = new THREE.MeshBasicMaterial({ color: 0x4a2f1d });
+        const fuelMat = new THREE.MeshBasicMaterial({ color: 0xffd27a });
+
+        const paperMatPlain = new THREE.MeshStandardMaterial({
+          map: paperTexPlain,
+          emissiveMap: paperTexPlain,
+          emissive: 0xff9b3d,
+          emissiveIntensity: 0.95,
+          roughness: 0.84,
+          side: THREE.DoubleSide,
+          transparent: true,
+          opacity: 0.94
+        });
+
+        const paperMatMotif = new THREE.MeshStandardMaterial({
+          map: paperTexMotif,
+          emissiveMap: paperTexMotif,
+          emissive: 0xffa445,
+          emissiveIntensity: 1.05,
+          roughness: 0.82,
+          side: THREE.DoubleSide,
+          transparent: true,
+          opacity: 0.95
+        });
+
+        const wireGeo = new THREE.CylinderGeometry(0.008, 0.008, 0.52, 6);
+        const outerFlameGeo = new THREE.ConeGeometry(0.068, 0.19, 10);
+        const innerFlameGeo = new THREE.ConeGeometry(0.036, 0.11, 8);
+        const outerFlameMat = new THREE.MeshBasicMaterial({ color: 0xffa629 });
+        const innerFlameMat = new THREE.MeshBasicMaterial({ color: 0xfffef0 });
+
+        for (let i = 0; i < count; i++) {
+          const lGroup = new THREE.Group();
+          const scale = 0.40 + (i % 5) * 0.14;
+
+          // Curved Kongming lantern shell
+          const body = new THREE.Mesh(sharedLanternGeo, i % 2 === 0 ? paperMatMotif : paperMatPlain);
+          lGroup.add(body);
+
+          // Open bottom bamboo rim
+          const rim = new THREE.Mesh(new THREE.TorusGeometry(0.26, 0.022, 8, 22), rimMat);
+          rim.rotation.x = Math.PI / 2;
+          rim.position.y = -0.42;
+          lGroup.add(rim);
+
+          // Crossed bamboo wire frame inside open base
+          const wireA = new THREE.Mesh(wireGeo, wireMat);
+          wireA.rotation.z = Math.PI / 2;
+          wireA.position.y = -0.42;
+          lGroup.add(wireA);
+
+          const wireB = new THREE.Mesh(wireGeo, wireMat);
+          wireB.rotation.x = Math.PI / 2;
+          wireB.position.y = -0.42;
+          lGroup.add(wireB);
+
+          // Wax fuel cell at wire intersection
+          const fuel = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.04, 0.08), fuelMat);
+          fuel.position.y = -0.40;
+          lGroup.add(fuel);
+
+          // Real animated teardrop flame burning inside
+          const flameCore = new THREE.Group();
+          flameCore.position.y = -0.30;
+          const fOut = new THREE.Mesh(outerFlameGeo, outerFlameMat);
+          const fIn = new THREE.Mesh(innerFlameGeo, innerFlameMat);
+          fIn.position.y = -0.02;
+          flameCore.add(fOut);
+          flameCore.add(fIn);
+          lGroup.add(flameCore);
+
+          // Soft ambient lantern bokeh halo
+          const halo = new THREE.Sprite(
+            new THREE.SpriteMaterial({
+              map: glowTex,
+              color: 0xffbd59,
+              transparent: true,
+              opacity: 0.60,
+              blending: THREE.AdditiveBlending,
+              depthWrite: false
+            })
+          );
+          halo.scale.set(2.5, 2.5, 1);
+          halo.position.y = -0.08;
+          lGroup.add(halo);
+
+          const ang = (i / count) * Math.PI * 2 * 3 + (i % 4) * 0.35;
+          const dist = 6.0 + (i % 6) * 2.15;
+          const x = Math.cos(ang) * dist;
+          const z = Math.sin(ang) * dist - 2.6;
+          const y = -7.5 + (i / count) * 17.5;
+
+          lGroup.position.set(x, y, z);
+          lGroup.scale.setScalar(scale);
+          lGroup.userData = {
+            baseX: x,
+            baseZ: z,
+            riseSpeed: 0.007 + (i % 5) * 0.0025,
+            phase: i * 0.85,
+            flameCore,
+            halo
+          };
+
+          lanternsGroup.add(lGroup);
+          skyLanterns.push(lGroup);
+        }
+
+        // Distant Festival Depth Layer: 115 tiny glowing lanterns drifting across the far horizon
+        const dCount = 115;
+        const dPos = new Float32Array(dCount * 3);
+        const dSpeeds = new Float32Array(dCount);
+        for (let d = 0; d < dCount; d++) {
+          const da = Math.random() * Math.PI * 2;
+          const dr = 20 + Math.random() * 19;
+          dPos[d * 3] = Math.cos(da) * dr;
+          dPos[d * 3 + 1] = -4.5 + Math.random() * 18;
+          dPos[d * 3 + 2] = Math.sin(da) * dr;
+          dSpeeds[d] = 0.004 + Math.random() * 0.007;
+        }
+        const dGeo = new THREE.BufferGeometry();
+        dGeo.setAttribute('position', new THREE.BufferAttribute(dPos, 3));
+        distantLanterns = new THREE.Points(
+          dGeo,
+          new THREE.PointsMaterial({
+            map: glowTex,
+            color: 0xffb84d,
+            size: 0.95,
+            transparent: true,
+            opacity: 0.85,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            fog: false
+          })
+        );
+        distantLanterns.userData = { speeds: dSpeeds };
+        lanternsGroup.add(distantLanterns);
+
+        scene.add(lanternsGroup);
+      }
+
+      // Shimmering Moonlit Lake Reflection Plane below the Lantern Sky
+      function buildMoonlitWater() {
+        const geo = new THREE.PlaneGeometry(68, 68, 36, 36);
+        geo.rotateX(-Math.PI / 2);
+        const mat = new THREE.MeshStandardMaterial({
+          color: 0x0b1533,
+          emissive: 0x121024,
+          emissiveIntensity: 0.35,
+          roughness: 0.14,
+          metalness: 0.85,
+          transparent: true,
+          opacity: 0.72
+        });
+        waterMesh = new THREE.Mesh(geo, mat);
+        waterMesh.position.y = -5.6;
+        scene.add(waterMesh);
+      }
+
+      // 3D Shooting Star / Meteor streaking across the night sky
+      function spawnShootingStar() {
+        const startX = (Math.random() - 0.3) * 22;
+        const startY = 4.5 + Math.random() * 5.5;
+        const startZ = -10 - Math.random() * 6;
+        const starGeo = new THREE.CylinderGeometry(0.012, 0.055, 2.4, 8);
+        starGeo.rotateZ(Math.PI / 3);
+        const starMat = new THREE.MeshBasicMaterial({ color: 0xfff4cc, transparent: true, opacity: 0.95 });
+        const mesh = new THREE.Mesh(starGeo, starMat);
+        mesh.position.set(startX, startY, startZ);
+        mesh.userData = { vx: -0.34 - Math.random() * 0.15, vy: -0.18 - Math.random() * 0.08, life: 1 };
+        scene.add(mesh);
+        shootingStars.push(mesh);
+      }
+
+      // 3D Spherical Sky Fireworks Burst!
+      function launch3DFirework(originX, originY, originZ) {
+        if (!scene) return;
+        const cx = typeof originX === 'number' ? originX : (Math.random() - 0.5) * 10;
+        const cy = typeof originY === 'number' ? originY : 2.2 + Math.random() * 3.5;
+        const cz = typeof originZ === 'number' ? originZ : -3 - Math.random() * 5;
+        const colors = [0xffbf59, 0xff7e5f, 0xfff4cc, 0x7dd3fc, 0xf472b6];
+        const colA = colors[Math.floor(Math.random() * colors.length)];
+        const colB = colors[Math.floor(Math.random() * colors.length)];
+
+        const count = 38;
+        const positions = new Float32Array(count * 3);
+        const vels = [];
+        for (let i = 0; i < count; i++) {
+          positions[i * 3] = cx;
+          positions[i * 3 + 1] = cy;
+          positions[i * 3 + 2] = cz;
+          const theta = Math.random() * Math.PI * 2;
+          const phi = Math.acos(2 * Math.random() - 1);
+          const spd = 0.08 + Math.random() * 0.14;
+          vels.push({
+            x: Math.sin(phi) * Math.cos(theta) * spd,
+            y: Math.cos(phi) * spd,
+            z: Math.sin(phi) * Math.sin(theta) * spd
+          });
+        }
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        const mat = new THREE.PointsMaterial({
+          color: colA,
+          size: 0.22,
+          transparent: true,
+          opacity: 1,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false
+        });
+        const pts = new THREE.Points(geo, mat);
+        pts.userData = { vels, life: 1, altColor: colB };
+        scene.add(pts);
+        fireworkBursts.push(pts);
+      }
+
+      // Silently forward Priya's wish to Ritu's email via Web3Forms or Formspree (if configured)
+      async function sendWishToEmail(wishText) {
+        if (!wishText) return;
+        try {
+          if (CONFIG.web3formsAccessKey && CONFIG.web3formsAccessKey.trim()) {
+            await fetch('https://api.web3forms.com/submit', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+              body: JSON.stringify({
+                access_key: CONFIG.web3formsAccessKey.trim(),
+                subject: `Priya's Birthday Wish Lantern`,
+                from_name: `Priya's Birthday Site`,
+                message: wishText
+              })
+            });
+          } else if (CONFIG.wishEmailEndpoint && CONFIG.wishEmailEndpoint.trim()) {
+            await fetch(CONFIG.wishEmailEndpoint.trim(), {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+              body: JSON.stringify({
+                subject: `Priya's Birthday Wish Lantern`,
+                message: wishText,
+                timestamp: new Date().toISOString()
+              })
+            });
+          }
+        } catch (err) {
+          // Fail silently so Priya's lantern experience is never interrupted
+        }
+      }
+
+      // Point 4: Launch a special luminous 3D Wish Lantern rising from the center of the sky
+      function launchWishLantern(wishText) {
+        if (!scene) return;
+        const glowTex = createWarmGlowSpriteTexture();
+        const paperTex = createLanternPaperTexture(true);
+        const wGroup = new THREE.Group();
+
+        const paperMat = new THREE.MeshStandardMaterial({
+          map: paperTex,
+          emissiveMap: paperTex,
+          emissive: 0xffb347,
+          emissiveIntensity: 1.35,
+          roughness: 0.75,
+          side: THREE.DoubleSide,
+          transparent: true,
+          opacity: 0.98
+        });
+        const body = new THREE.Mesh(createCurvedLanternGeometry(1.55), paperMat);
+        wGroup.add(body);
+
+        const rimMat = new THREE.MeshStandardMaterial({ color: 0xe6b85c, metalness: 0.75, roughness: 0.25 });
+        const rim = new THREE.Mesh(new THREE.TorusGeometry(0.40, 0.032, 8, 24), rimMat);
+        rim.rotation.x = Math.PI / 2;
+        rim.position.y = -0.65;
+        wGroup.add(rim);
+
+        const wWireA = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.80, 6), rimMat);
+        wWireA.rotation.z = Math.PI / 2;
+        wWireA.position.y = -0.65;
+        wGroup.add(wWireA);
+        const wWireB = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.80, 6), rimMat);
+        wWireB.rotation.x = Math.PI / 2;
+        wWireB.position.y = -0.65;
+        wGroup.add(wWireB);
+
+        const core = new THREE.Mesh(
+          new THREE.SphereGeometry(0.18, 12, 12),
+          new THREE.MeshBasicMaterial({ color: 0xfffef0 })
+        );
+        core.position.y = -0.32;
+        wGroup.add(core);
+
+        const halo = new THREE.Sprite(
+          new THREE.SpriteMaterial({
+            map: glowTex,
+            color: 0xffcf70,
+            transparent: true,
+            opacity: 0.85,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+          })
+        );
+        halo.scale.set(4.5, 4.5, 1);
+        wGroup.add(halo);
+
+        const pt = new THREE.PointLight(0xffbf59, 1.8, 12);
+        wGroup.add(pt);
+
+        wGroup.position.set((Math.random() - 0.5) * 1.4, -4.2, 2.2);
+        wGroup.userData = {
+          riseSpeed: 0.028,
+          driftX: (Math.random() - 0.5) * 0.008,
+          driftZ: -0.018,
+          phase: Math.random() * Math.PI * 2,
+          life: 1,
+          wishText: wishText || ''
+        };
+
+        scene.add(wGroup);
+        wishLanterns.push(wGroup);
+        fireLanternConfetti(true);
+        playChimeSfx();
+      }
+
+      // Interactive 3D Magic Stardust Trail following cursor/touch
+      function spawnCursorSpark(ndcX, ndcY) {
+        if (!camera || !scene || cursorSparks.length > 42) return;
+        const vec = new THREE.Vector3(ndcX, ndcY, 0.5).unproject(camera);
+        const dir = vec.sub(camera.position).normalize();
+        const pos = camera.position.clone().add(dir.multiplyScalar(8.5));
+        const mesh = new THREE.Mesh(
+          new THREE.OctahedronGeometry(0.065, 0),
+          new THREE.MeshBasicMaterial({ color: Math.random() > 0.4 ? 0xffcf70 : 0xfff8dc, transparent: true, opacity: 0.9 })
+        );
+        mesh.position.copy(pos);
+        mesh.userData = {
+          vx: (Math.random() - 0.5) * 0.025,
+          vy: 0.015 + Math.random() * 0.02,
+          vz: (Math.random() - 0.5) * 0.025,
+          life: 1
+        };
+        scene.add(mesh);
+        cursorSparks.push(mesh);
+      }
+
+      function createSkyDomeTexture() {
+        const c = document.createElement('canvas');
+        c.width = 1024;
+        c.height = 512;
+        const ctx = c.getContext('2d');
+
+        // Rich panoramic twilight sky gradient (deep midnight zenith -> indigo -> violet -> warm lantern horizon)
+        const skyGrad = ctx.createLinearGradient(0, 0, 0, 512);
+        skyGrad.addColorStop(0.0, '#030510');
+        skyGrad.addColorStop(0.28, '#081029');
+        skyGrad.addColorStop(0.50, '#131d42');
+        skyGrad.addColorStop(0.64, '#241d3c');
+        skyGrad.addColorStop(0.76, '#3b2434');
+        skyGrad.addColorStop(0.88, '#171224');
+        skyGrad.addColorStop(1.0, '#050712');
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, 1024, 512);
+
+        // Diagonal Milky Way nebula band
+        ctx.save();
+        ctx.translate(512, 190);
+        ctx.rotate(-0.34);
+        const mwGrad = ctx.createLinearGradient(0, -85, 0, 85);
+        mwGrad.addColorStop(0.0, 'rgba(99, 132, 230, 0)');
+        mwGrad.addColorStop(0.32, 'rgba(125, 165, 255, 0.12)');
+        mwGrad.addColorStop(0.5, 'rgba(255, 224, 175, 0.16)');
+        mwGrad.addColorStop(0.68, 'rgba(168, 120, 235, 0.11)');
+        mwGrad.addColorStop(1.0, 'rgba(99, 132, 230, 0)');
+        ctx.fillStyle = mwGrad;
+        ctx.fillRect(-680, -85, 1360, 170);
+
+        // Soft glowing cosmic dust puffs along the Milky Way
+        for (let n = 0; n < 38; n++) {
+          const nx = (Math.random() - 0.5) * 1050;
+          const ny = (Math.random() - 0.5) * 90;
+          const nr = 24 + Math.random() * 55;
+          const ng = ctx.createRadialGradient(nx, ny, 2, nx, ny, nr);
+          ng.addColorStop(0, n % 2 === 0 ? 'rgba(180, 210, 255, 0.11)' : 'rgba(255, 200, 145, 0.09)');
+          ng.addColorStop(1, 'rgba(0, 0, 0, 0)');
+          ctx.fillStyle = ng;
+          ctx.beginPath();
+          ctx.arc(nx, ny, nr, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+
+        // Embedded distant micro-stars across upper hemisphere
+        for (let s = 0; s < 520; s++) {
+          const sx = Math.random() * 1024;
+          const sy = Math.random() * 340;
+          const sr = 0.45 + Math.random() * 1.15;
+          const alpha = 0.25 + Math.random() * 0.65;
+          ctx.fillStyle = s % 5 === 0 ? `rgba(255, 218, 150, ${alpha})` : `rgba(235, 244, 255, ${alpha})`;
+          ctx.beginPath();
+          ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        const tex = new THREE.CanvasTexture(c);
+        tex.encoding = THREE.sRGBEncoding;
+        return tex;
+      }
+
+      function createMoonTexture() {
+        const c = document.createElement('canvas');
+        c.width = 256;
+        c.height = 256;
+        const ctx = c.getContext('2d');
+        const g = ctx.createRadialGradient(110, 105, 16, 128, 128, 130);
+        g.addColorStop(0, '#fff9e6');
+        g.addColorStop(0.65, '#f7e4b4');
+        g.addColorStop(1, '#d9bc82');
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, 256, 256);
+
+        // Soft lunar maria / craters
+        const craters = [
+          [78, 92, 26], [156, 78, 20], [134, 154, 30], [82, 168, 16],
+          [184, 140, 18], [116, 62, 14], [164, 186, 12], [58, 132, 14]
+        ];
+        craters.forEach(([cx, cy, cr]) => {
+          const cg = ctx.createRadialGradient(cx, cy, 2, cx, cy, cr);
+          cg.addColorStop(0, 'rgba(155, 128, 82, 0.34)');
+          cg.addColorStop(0.75, 'rgba(175, 148, 100, 0.16)');
+          cg.addColorStop(1, 'rgba(175, 148, 100, 0)');
+          ctx.fillStyle = cg;
+          ctx.beginPath();
+          ctx.arc(cx, cy, cr, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        return new THREE.CanvasTexture(c);
+      }
+
+      function createCloudTexture() {
+        const c = document.createElement('canvas');
+        c.width = 256;
+        c.height = 128;
+        const ctx = c.getContext('2d');
+        const puffs = [
+          [82, 74, 48], [126, 60, 56], [172, 76, 44], [108, 82, 42], [148, 82, 40]
+        ];
+        puffs.forEach(([px, py, pr]) => {
+          const g = ctx.createRadialGradient(px, py, 4, px, py, pr);
+          g.addColorStop(0, 'rgba(255, 224, 182, 0.28)');
+          g.addColorStop(0.55, 'rgba(130, 150, 210, 0.14)');
+          g.addColorStop(1, 'rgba(0, 0, 0, 0)');
+          ctx.fillStyle = g;
+          ctx.beginPath();
+          ctx.arc(px, py, pr, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        return new THREE.CanvasTexture(c);
+      }
+
+      function createStarSpriteTexture() {
+        const c = document.createElement('canvas');
+        c.width = 64;
+        c.height = 64;
+        const ctx = c.getContext('2d');
+        const g = ctx.createRadialGradient(32, 32, 1, 32, 32, 28);
+        g.addColorStop(0, 'rgba(255, 255, 255, 1)');
+        g.addColorStop(0.25, 'rgba(255, 245, 220, 0.75)');
+        g.addColorStop(0.65, 'rgba(255, 220, 160, 0.15)');
+        g.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, 64, 64);
+        return new THREE.CanvasTexture(c);
+      }
+
+      function buildCrescentMoonAndStars() {
+        // 1. Panoramic 3D Milky Way Sky Dome (rotates smoothly as you orbit!)
+        const domeGeo = new THREE.SphereGeometry(86, 48, 32);
+        const domeMat = new THREE.MeshBasicMaterial({
+          map: createSkyDomeTexture(),
+          side: THREE.BackSide,
+          fog: false,
+          depthWrite: false
+        });
+        skyDome = new THREE.Mesh(domeGeo, domeMat);
+        scene.add(skyDome);
+
+        // 2. Multi-Layer Twinkling 3D Starfields (warm gold + crisp starlight blue-white)
+        const starSprite = createStarSpriteTexture();
+
+        function makeStarLayer(count, radiusMin, radiusMax, colorHex, size) {
+          const arr = new Float32Array(count * 3);
+          for (let i = 0; i < count; i++) {
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.random() * Math.PI * 0.52; // upper hemisphere
+            const rad = radiusMin + Math.random() * (radiusMax - radiusMin);
+            arr[i * 3] = Math.sin(phi) * Math.cos(theta) * rad;
+            arr[i * 3 + 1] = Math.cos(phi) * rad - 2;
+            arr[i * 3 + 2] = Math.sin(phi) * Math.sin(theta) * rad;
+          }
+          const g = new THREE.BufferGeometry();
+          g.setAttribute('position', new THREE.BufferAttribute(arr, 3));
+          return new THREE.Points(
+            g,
+            new THREE.PointsMaterial({
+              map: starSprite,
+              color: colorHex,
+              size: size,
+              transparent: true,
+              opacity: 0.88,
+              blending: THREE.AdditiveBlending,
+              depthWrite: false,
+              fog: false
+            })
+          );
+        }
+
+        starPoints = makeStarLayer(240, 26, 56, 0xfdf6e7, 0.42);
+        warmStarPoints = makeStarLayer(140, 24, 52, 0xffd27d, 0.56);
+        coolStarPoints = makeStarLayer(140, 28, 58, 0xa8c8ff, 0.48);
+        scene.add(starPoints);
+        scene.add(warmStarPoints);
+        scene.add(coolStarPoints);
+
+        // 3. Golden Firefly Stardust drifting closer
+        const ffCount = 95;
+        const ffPos = new Float32Array(ffCount * 3);
+        for (let i = 0; i < ffCount; i++) {
+          ffPos[i * 3] = (Math.random() - 0.5) * 18;
+          ffPos[i * 3 + 1] = (Math.random() - 0.5) * 12;
+          ffPos[i * 3 + 2] = (Math.random() - 0.5) * 14;
+        }
+        const ffGeo = new THREE.BufferGeometry();
+        ffGeo.setAttribute('position', new THREE.BufferAttribute(ffPos, 3));
+        fireflyPoints = new THREE.Points(
+          ffGeo,
+          new THREE.PointsMaterial({
+            map: starSprite,
+            color: 0xffcf70,
+            size: 0.24,
+            transparent: true,
+            opacity: 0.8,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+          })
+        );
+        scene.add(fireflyPoints);
+
+        // 4. Detailed Cratered Full Moon with luminous atmospheric halo
+        moonGroup = new THREE.Group();
+        const moonMesh = new THREE.Mesh(
+          new THREE.SphereGeometry(1.55, 36, 36),
+          new THREE.MeshBasicMaterial({ map: createMoonTexture(), fog: false })
+        );
+        moonGroup.add(moonMesh);
+        const moonHalo = new THREE.Sprite(
+          new THREE.SpriteMaterial({
+            map: createWarmGlowSpriteTexture(),
+            color: 0xffe4a8,
+            transparent: true,
+            opacity: 0.72,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            fog: false
+          })
+        );
+        moonHalo.scale.set(9.5, 9.5, 1);
+        moonGroup.add(moonHalo);
+        moonGroup.position.set(10.5, 7.2, -22);
+        scene.add(moonGroup);
+
+        // 5. Slow-Drifting Translucent Moonlit Clouds along the upper horizon
+        const cloudTex = createCloudTexture();
+        cloudSprites = [];
+        for (let c = 0; c < 14; c++) {
+          const ang = (c / 14) * Math.PI * 2;
+          const dist = 24 + (c % 3) * 6;
+          const sp = new THREE.Sprite(
+            new THREE.SpriteMaterial({
+              map: cloudTex,
+              transparent: true,
+              opacity: 0.52,
+              depthWrite: false,
+              fog: false
+            })
+          );
+          sp.position.set(Math.cos(ang) * dist, 1.8 + (c % 4) * 1.4, Math.sin(ang) * dist);
+          sp.scale.set(11 + (c % 3) * 4, 5.2 + (c % 2) * 1.8, 1);
+          sp.userData = { angle: ang, dist: dist, speed: 0.00025 + (c % 3) * 0.00012 };
+          scene.add(sp);
+          cloudSprites.push(sp);
+        }
+
+        // 6. Distant Silhouetted Mountain Horizon Ring framing the Moonlit Lake
+        const hillGeo = new THREE.CylinderGeometry(44, 44, 6.2, 72, 1, true);
+        const hPos = hillGeo.attributes.position;
+        for (let i = 0; i < hPos.count; i++) {
+          if (hPos.getY(i) > 0) {
+            const x = hPos.getX(i);
+            const z = hPos.getZ(i);
+            const a = Math.atan2(z, x);
+            const ridge = Math.sin(a * 5) * 1.4 + Math.cos(a * 9 + 1.2) * 0.9 + Math.sin(a * 15) * 0.45;
+            hPos.setY(i, 2.2 + ridge);
+          }
+        }
+        hillGeo.computeVertexNormals();
+        horizonHills = new THREE.Mesh(
+          hillGeo,
+          new THREE.MeshBasicMaterial({ color: 0x070a18, side: THREE.BackSide, fog: false })
+        );
+        horizonHills.position.y = -4.6;
+        scene.add(horizonHills);
+      }
+
+      // Celestial Midnight-Blue & Cream-Gold Patisserie Cake (slightly compact default scale)
+      function build3DCake() {
+        cakeGroup = new THREE.Group();
+        cakeGroup.scale.setScalar(0.76);
+        cakeGroup.visible = false;
+
+        const brassMat = new THREE.MeshStandardMaterial({ color: 0xe6b85c, metalness: 0.82, roughness: 0.24 });
+        const navyPlatterMat = new THREE.MeshStandardMaterial({ color: 0x141d3d, metalness: 0.4, roughness: 0.28 });
+
+        const standBase = new THREE.Mesh(new THREE.CylinderGeometry(1.45, 1.85, 0.26, 40), brassMat);
+        standBase.position.y = -2.82;
+        cakeGroup.add(standBase);
+
+        const standStem = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.62, 0.72, 32), brassMat);
+        standStem.position.y = -2.34;
+        cakeGroup.add(standStem);
+
+        const platter = new THREE.Mesh(new THREE.CylinderGeometry(3.25, 3.0, 0.22, 56), navyPlatterMat);
+        platter.position.y = -1.92;
+        cakeGroup.add(platter);
+
+        const platterRim = new THREE.Mesh(new THREE.TorusGeometry(3.22, 0.06, 16, 64), brassMat);
+        platterRim.rotation.x = Math.PI / 2;
+        platterRim.position.y = -1.82;
+        cakeGroup.add(platterRim);
+
+        // 3 Tiers: Midnight Navy, Warm Champagne Cream, Honey Gold
+        const creamMat = new THREE.MeshStandardMaterial({ color: 0xfff8e7, roughness: 0.36, metalness: 0.05 });
+        const tiers = [
+          { r: 2.52, h: 1.24, y: -1.18, color: 0x1d2b5c },
+          { r: 1.9,  h: 1.08, y: -0.02, color: 0xf7e7c8 },
+          { r: 1.3,  h: 0.92, y: 0.96,  color: 0x2d427d }
+        ];
+
+        tiers.forEach((t) => {
+          const body = new THREE.Mesh(
+            new THREE.CylinderGeometry(t.r, t.r * 1.015, t.h, 52),
+            new THREE.MeshStandardMaterial({ color: t.color, roughness: 0.42, metalness: 0.1 })
+          );
+          body.position.y = t.y;
+          cakeGroup.add(body);
+
+          const rim = new THREE.Mesh(new THREE.TorusGeometry(t.r - 0.02, 0.11, 14, 52), creamMat);
+          rim.rotation.x = Math.PI / 2;
+          rim.position.y = t.y + t.h / 2;
+          cakeGroup.add(rim);
+
+          const pearls = Math.round(t.r * 10);
+          for (let p = 0; p < pearls; p++) {
+            const ang = (p / pearls) * Math.PI * 2;
+            const pearl = new THREE.Mesh(new THREE.SphereGeometry(0.08, 10, 10), brassMat);
+            pearl.position.set(Math.cos(ang) * (t.r + 0.04), t.y - t.h / 2 + 0.09, Math.sin(ang) * (t.r + 0.04));
+            cakeGroup.add(pearl);
+          }
+        });
+
+        // 7 Slender Ivory & Gold Candles
+        const candleCount = 7;
+        const cRadius = 0.78;
+        const candleColors = [0xfff6e0, 0xffbf59, 0xfff6e0, 0xff9f45, 0xfff6e0, 0xffbf59, 0xfff6e0];
+
+        for (let i = 0; i < candleCount; i++) {
+          const ang = (i / candleCount) * Math.PI * 2;
+          const cx = Math.cos(ang) * cRadius;
+          const cz = Math.sin(ang) * cRadius;
+
+          const stick = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.072, 0.072, 0.88, 16),
+            new THREE.MeshStandardMaterial({ color: candleColors[i], roughness: 0.3 })
+          );
+          stick.position.set(cx, 1.86, cz);
+          stick.userData = { candleIdx: i };
+          cakeGroup.add(stick);
+          candleHitTargets.push(stick);
+
+          const flameGroup = new THREE.Group();
+          flameGroup.position.set(cx, 2.45, cz);
+
+          const outer = new THREE.Mesh(
+            new THREE.ConeGeometry(0.115, 0.34, 16),
+            new THREE.MeshBasicMaterial({ color: 0xffa629 })
+          );
+          outer.userData = { candleIdx: i };
+          const inner = new THREE.Mesh(
+            new THREE.ConeGeometry(0.055, 0.19, 12),
+            new THREE.MeshBasicMaterial({ color: 0xfffef0 })
+          );
+          inner.position.y = -0.04;
+          flameGroup.add(outer);
+          flameGroup.add(inner);
+          cakeGroup.add(flameGroup);
+          candleFlames.push(flameGroup);
+          candleHitTargets.push(outer);
+
+          const pt = new THREE.PointLight(0xffb84d, 0.55, 4.8);
+          pt.position.set(cx, 2.55, cz);
+          cakeGroup.add(pt);
+          candleLights.push(pt);
+        }
+
+        // Golden orbiting celestial ring around the cake
+        cakeOrbitRing = new THREE.Group();
+        const ringGeo = new THREE.TorusGeometry(3.7, 0.022, 8, 72);
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0xffcf70, transparent: true, opacity: 0.45 });
+        const orbitMesh = new THREE.Mesh(ringGeo, ringMat);
+        orbitMesh.rotation.x = Math.PI / 2.2;
+        cakeOrbitRing.add(orbitMesh);
+        for (let st = 0; st < 12; st++) {
+          const a = (st / 12) * Math.PI * 2;
+          const starDot = new THREE.Mesh(
+            new THREE.OctahedronGeometry(0.09, 0),
+            new THREE.MeshBasicMaterial({ color: 0xfff6d6 })
+          );
+          starDot.position.set(Math.cos(a) * 3.7, Math.sin(a) * 0.55, Math.sin(a) * 3.7);
+          cakeOrbitRing.add(starDot);
+        }
+        cakeGroup.add(cakeOrbitRing);
+
+        scene.add(cakeGroup);
+      }
+
+      // Midnight Velvet & Antique Gold Keepsake Box (touch anywhere to open)
+      function build3DGiftBox() {
+        giftGroup = new THREE.Group();
+        giftGroup.scale.setScalar(0.74);
+        giftGroup.visible = false;
+
+        const velvetMat = new THREE.MeshStandardMaterial({ color: 0x19254f, roughness: 0.48, metalness: 0.18 });
+        const goldMat = new THREE.MeshStandardMaterial({ color: 0xffbf59, roughness: 0.22, metalness: 0.78 });
+        const innerMat = new THREE.MeshStandardMaterial({ color: 0x0c1126, roughness: 0.8 });
+
+        const base = new THREE.Mesh(new THREE.BoxGeometry(2.8, 2.2, 2.8), velvetMat);
+        base.position.y = -0.3;
+        base.userData = { isGift: true };
+        giftGroup.add(base);
+        giftHitTargets.push(base);
+
+        const recess = new THREE.Mesh(new THREE.BoxGeometry(2.55, 0.12, 2.55), innerMat);
+        recess.position.y = 0.76;
+        giftGroup.add(recess);
+
+        const rib1 = new THREE.Mesh(new THREE.BoxGeometry(2.86, 2.22, 0.42), goldMat);
+        rib1.position.y = -0.3;
+        rib1.userData = { isGift: true };
+        giftGroup.add(rib1);
+        giftHitTargets.push(rib1);
+
+        const rib2 = new THREE.Mesh(new THREE.BoxGeometry(0.42, 2.22, 2.86), goldMat);
+        rib2.position.y = -0.3;
+        rib2.userData = { isGift: true };
+        giftGroup.add(rib2);
+        giftHitTargets.push(rib2);
+
+        giftLidPivot = new THREE.Group();
+        giftLidPivot.position.set(0, 0.82, -1.45);
+
+        const lid = new THREE.Mesh(new THREE.BoxGeometry(3.04, 0.56, 3.04), velvetMat);
+        lid.position.set(0, 0.28, 1.45);
+        lid.userData = { isGift: true };
+        giftLidPivot.add(lid);
+        giftHitTargets.push(lid);
+
+        const lRib1 = new THREE.Mesh(new THREE.BoxGeometry(3.09, 0.59, 0.44), goldMat);
+        lRib1.position.set(0, 0.28, 1.45);
+        giftLidPivot.add(lRib1);
+
+        const lRib2 = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.59, 3.09), goldMat);
+        lRib2.position.set(0, 0.28, 1.45);
+        giftLidPivot.add(lRib2);
+
+        const bowCore = new THREE.Mesh(new THREE.SphereGeometry(0.24, 18, 18), goldMat);
+        bowCore.position.set(0, 0.68, 1.45);
+        giftLidPivot.add(bowCore);
+
+        for (let b = 0; b < 4; b++) {
+          const loop = new THREE.Mesh(new THREE.TorusGeometry(0.42, 0.11, 14, 32), goldMat);
+          const ang = (b / 4) * Math.PI * 2 + Math.PI / 4;
+          loop.position.set(Math.cos(ang) * 0.38, 0.78, 1.45 + Math.sin(ang) * 0.38);
+          loop.rotation.y = -ang;
+          loop.rotation.x = Math.PI / 3.2;
+          giftLidPivot.add(loop);
+        }
+
+        giftGroup.add(giftLidPivot);
+
+        giftGlowLight = new THREE.PointLight(0xffbf59, 0.3, 9);
+        giftGlowLight.position.set(0, 1.1, 0);
+        giftGroup.add(giftGlowLight);
+
+        // Volumetric golden light beam rising from inside the keepsake box when opened
+        boxLightBeam = new THREE.Mesh(
+          new THREE.CylinderGeometry(1.9, 0.9, 4.2, 24, 1, true),
+          new THREE.MeshBasicMaterial({
+            color: 0xffcf70,
+            transparent: true,
+            opacity: 0,
+            side: THREE.DoubleSide,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+          })
+        );
+        boxLightBeam.position.y = 2.6;
+        giftGroup.add(boxLightBeam);
+
+        scene.add(giftGroup);
+      }
+
+      // 6 Wide-Spaced Poppable Wishing Balloons
+      function build3DBalloons() {
+        balloonsGroup = new THREE.Group();
+        balloonsGroup.visible = false;
+        balloonItems = [];
+        balloonHitTargets = [];
+
+        const palette = [0xffbf59, 0xff8c5a, 0xffe4b5, 0x6b8cff, 0xf59e0b, 0xfdf6e7];
+        const layout = [
+          { x: -3.4, y: 1.65, z: 0.4 },
+          { x: 0.0,  y: 2.05, z: -0.9 },
+          { x: 3.4,  y: 1.6,  z: 0.4 },
+          { x: -2.6, y: -1.35, z: 1.1 },
+          { x: 0.0,  y: -1.05, z: 1.5 },
+          { x: 2.6,  y: -1.35, z: 1.1 }
+        ];
+
+        const stringMat = new THREE.MeshBasicMaterial({ color: 0xffe4b5, transparent: true, opacity: 0.55 });
+
+        CONFIG.smallLoveLetters.forEach((note, idx) => {
+          const bGroup = new THREE.Group();
+          const col = palette[idx % palette.length];
+          const pos = layout[idx % layout.length];
+
+          const mat = new THREE.MeshStandardMaterial({
+            color: col,
+            emissive: col,
+            emissiveIntensity: 0.16,
+            roughness: 0.18,
+            metalness: 0.25
+          });
+
+          const body = new THREE.Mesh(new THREE.SphereGeometry(0.7, 32, 32), mat);
+          body.scale.set(0.86, 1.08, 0.86);
+          body.userData = { balloonIdx: idx };
+          bGroup.add(body);
+          balloonHitTargets.push(body);
+
+          const shine = new THREE.Mesh(
+            new THREE.SphereGeometry(0.13, 12, 12),
+            new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.45 })
+          );
+          shine.position.set(-0.22, 0.26, 0.46);
+          shine.scale.set(0.7, 1.3, 0.4);
+          bGroup.add(shine);
+
+          const knot = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.15, 12), mat);
+          knot.position.y = -0.8;
+          knot.userData = { balloonIdx: idx };
+          bGroup.add(knot);
+          balloonHitTargets.push(knot);
+
+          const str = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 1.75, 8), stringMat);
+          str.position.y = -1.72;
+          bGroup.add(str);
+
+          bGroup.position.set(pos.x, pos.y, pos.z);
+          bGroup.userData = {
+            idx,
+            baseX: pos.x,
+            baseY: pos.y,
+            phase: idx * 1.15,
+            popped: false,
+            color: col
+          };
+
+          balloonsGroup.add(bGroup);
+          balloonItems.push(bGroup);
+        });
+
+        scene.add(balloonsGroup);
+      }
+
+      function spawnSmoke(pos) {
+        for (let k = 0; k < 5; k++) {
+          const puff = new THREE.Mesh(
+            new THREE.SphereGeometry(0.065, 8, 8),
+            new THREE.MeshBasicMaterial({ color: 0xfdf6e7, transparent: true, opacity: 0.55 })
+          );
+          puff.position.set(pos.x + (Math.random() - 0.5) * 0.1, pos.y + Math.random() * 0.08, pos.z + (Math.random() - 0.5) * 0.1);
+          puff.userData = { vy: 0.017 + Math.random() * 0.014, life: 1 };
+          cakeGroup.add(puff);
+          smokePuffs.push(puff);
+        }
+      }
+
+      function spawnBalloonPopBurst(worldPos, colorHex) {
+        for (let k = 0; k < 14; k++) {
+          const piece = new THREE.Mesh(
+            new THREE.SphereGeometry(0.08, 8, 8),
+            new THREE.MeshBasicMaterial({ color: k % 2 === 0 ? colorHex : 0xffbf59, transparent: true, opacity: 0.95 })
+          );
+          piece.position.copy(worldPos);
+          piece.userData = {
+            vx: (Math.random() - 0.5) * 0.22,
+            vy: (Math.random() - 0.3) * 0.22,
+            vz: (Math.random() - 0.5) * 0.22,
+            life: 1
+          };
+          balloonsGroup.add(piece);
+          popParticles.push(piece);
+        }
+      }
+
+      function popBalloon(idx) {
+        const b = balloonItems[idx];
+        if (!b || b.userData.popped) return;
+        b.userData.popped = true;
+        b.visible = false;
+        spawnBalloonPopBurst(b.position, b.userData.color);
+        playPopSfx();
+        fireLanternConfetti(false);
+        openNoteModal(idx);
+      }
+
+      function resetBalloons() {
+        state.openedNotes.clear();
+        balloonItems.forEach((b) => {
+          b.userData.popped = false;
+          b.visible = true;
+        });
+        renderPoppedTray();
+        playChimeSfx();
+        showToast('Wishing balloons refilled!');
+      }
+
+      function init3DStage() {
+        const canvas = document.getElementById('webgl-stage');
+        if (!canvas || typeof THREE === 'undefined') return;
+
+        scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera(34, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 2.0, 14.2);
+
+        scene.fog = new THREE.FogExp2(0x090f24, 0.022);
+        renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.16;
+        renderer.outputEncoding = THREE.sRGBEncoding;
+
+        const nightEnv = createNightStudioEnv(renderer);
+        if (nightEnv) scene.environment = nightEnv;
+
+        // Warm Lantern & Moonlight Lighting Rig
+        scene.add(new THREE.AmbientLight(0xdbe6ff, 0.65));
+        const moonLight = new THREE.DirectionalLight(0xfff1d0, 0.9);
+        moonLight.position.set(8, 14, 10);
+        scene.add(moonLight);
+
+        const lanternWarmLight = new THREE.PointLight(0xffa43b, 1.5, 30);
+        lanternWarmLight.position.set(-7, 2, 6);
+        scene.add(lanternWarmLight);
+
+        const twilightRim = new THREE.PointLight(0x6b8cff, 1.1, 30);
+        twilightRim.position.set(7, -1, 6);
+        scene.add(twilightRim);
+
+        buildCrescentMoonAndStars();
+        buildSkyLanterns();
+        buildMoonlitWater();
+        build3DCake();
+        build3DGiftBox();
+        build3DBalloons();
+
+        function setPointer(clientX, clientY) {
+          pointer.x = (clientX / window.innerWidth) * 2 - 1;
+          pointer.y = -(clientY / window.innerHeight) * 2 + 1;
+        }
+
+        canvas.addEventListener('pointerdown', (e) => {
+          isDragging = true;
+          dragMoved = false;
+          dragPrevX = e.clientX;
+          dragPrevY = e.clientY;
+          setPointer(e.clientX, e.clientY);
+        });
+
+        window.addEventListener('pointerup', (e) => {
+          if (isDragging && !dragMoved) {
+            setPointer(e.clientX, e.clientY);
+            raycaster.setFromCamera(pointer, camera);
+
+            if (state.currentSlide === 1 && cakeGroup.visible) {
+              const hits = raycaster.intersectObjects(candleHitTargets, false);
+              if (hits.length > 0 && typeof hits[0].object.userData.candleIdx === 'number') {
+                extinguishCandle(hits[0].object.userData.candleIdx);
+              }
+            } else if (state.currentSlide === 2 && giftGroup.visible) {
+              if (!state.boxOpen) {
+                toggleGiftBox(true);
+              } else {
+                const hits = raycaster.intersectObjects(giftHitTargets, false);
+                if (hits.length > 0) toggleGiftBox(false);
+              }
+            } else if (state.currentSlide === 3 && balloonsGroup.visible) {
+              const activeTargets = balloonHitTargets.filter((m) => m.parent && m.parent.visible);
+              const hits = raycaster.intersectObjects(activeTargets, false);
+              if (hits.length > 0 && typeof hits[0].object.userData.balloonIdx === 'number') {
+                popBalloon(hits[0].object.userData.balloonIdx);
+              }
+            }
+          }
+          isDragging = false;
+        });
+
+        let lastSparkAt = 0;
+        window.addEventListener('pointermove', (e) => {
+          lanternBreeze.x = (e.clientX / window.innerWidth - 0.5) * 1.4;
+          lanternBreeze.y = (e.clientY / window.innerHeight - 0.5) * 0.6;
+          const nowMs = Date.now();
+          if (nowMs - lastSparkAt > 42) {
+            lastSparkAt = nowMs;
+            const nx = (e.clientX / window.innerWidth) * 2 - 1;
+            const ny = -(e.clientY / window.innerHeight) * 2 + 1;
+            spawnCursorSpark(nx, ny);
+          }
+
+          if (isDragging) {
+            const dx = e.clientX - dragPrevX;
+            const dy = e.clientY - dragPrevY;
+            if (Math.abs(dx) > 3 || Math.abs(dy) > 3) dragMoved = true;
+            camTargetRotY -= dx * 0.008;
+            camTargetRotX = Math.max(-0.35, Math.min(0.85, camTargetRotX + dy * 0.006));
+            dragPrevX = e.clientX;
+            dragPrevY = e.clientY;
+          }
+        });
+
+        // Mouse wheel zoom
+        canvas.addEventListener('wheel', (e) => {
+          e.preventDefault();
+          camTargetZoomOffset = Math.max(-5.5, Math.min(7.5, camTargetZoomOffset + e.deltaY * 0.008));
+        }, { passive: false });
+
+        // Mobile two-finger pinch zoom
+        canvas.addEventListener('touchstart', (e) => {
+          if (e.touches.length === 2) {
+            isDragging = false;
+            const dx = e.touches[0].clientX - e.touches[1].clientX;
+            const dy = e.touches[0].clientY - e.touches[1].clientY;
+            pinchStartDist = Math.hypot(dx, dy);
+            pinchStartZoom = camTargetZoomOffset;
+          }
+        }, { passive: true });
+
+        canvas.addEventListener('touchmove', (e) => {
+          if (e.touches.length === 2 && pinchStartDist) {
+            e.preventDefault();
+            const dx = e.touches[0].clientX - e.touches[1].clientX;
+            const dy = e.touches[0].clientY - e.touches[1].clientY;
+            const distNow = Math.hypot(dx, dy);
+            camTargetZoomOffset = Math.max(-5.5, Math.min(7.5, pinchStartZoom + (pinchStartDist - distNow) * 0.03));
+          }
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', (e) => {
+          if (e.touches.length < 2) pinchStartDist = null;
+        });
+
+        window.addEventListener('resize', () => {
+          camera.aspect = window.innerWidth / window.innerHeight;
+          camera.updateProjectionMatrix();
+          renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        function animate() {
+          requestAnimationFrame(animate);
+          const t = Date.now() * 0.002;
+
+          if (!isDragging) {
+            camTargetRotY += state.currentSlide === 1 ? 0.003 : 0.0014;
+          }
+
+          camRotX += (camTargetRotX - camRotX) * 0.06;
+          camRotY += (camTargetRotY - camRotY) * 0.06;
+          camZoomOffset += (camTargetZoomOffset - camZoomOffset) * 0.08;
+
+          const baseDist = state.currentSlide === 2 ? 12.4 : 14.2;
+          const dist = Math.max(6.2, Math.min(22.0, baseDist + camZoomOffset));
+          camera.position.x = Math.sin(camRotY) * dist;
+          camera.position.z = Math.cos(camRotY) * dist;
+          camera.position.y = Math.sin(camRotX) * 4.5 + 1.6;
+          camera.lookAt(0, 0.1, 0);
+
+          if (starPoints) {
+            starPoints.rotation.y += 0.00025;
+            starPoints.material.opacity = 0.72 + Math.sin(t * 2.1) * 0.2;
+          }
+          if (warmStarPoints) {
+            warmStarPoints.rotation.y += 0.00018;
+            warmStarPoints.material.opacity = 0.65 + Math.cos(t * 2.8 + 1.1) * 0.28;
+          }
+          if (coolStarPoints) {
+            coolStarPoints.rotation.y -= 0.00015;
+            coolStarPoints.material.opacity = 0.68 + Math.sin(t * 3.3 + 2.4) * 0.25;
+          }
+          if (skyDome) skyDome.rotation.y += 0.00008;
+          cloudSprites.forEach((cl) => {
+            cl.userData.angle += cl.userData.speed;
+            cl.position.x = Math.cos(cl.userData.angle) * cl.userData.dist;
+            cl.position.z = Math.sin(cl.userData.angle) * cl.userData.dist;
+          });
+          if (fireflyPoints) {
+            fireflyPoints.rotation.y -= 0.0009;
+            fireflyPoints.position.y = Math.sin(t * 0.6) * 0.4;
+          }
+
+          // Animated moonlit water wave shimmer
+          if (waterMesh && waterMesh.geometry && waterMesh.geometry.attributes.position) {
+            const posAttr = waterMesh.geometry.attributes.position;
+            for (let wi = 0; wi < posAttr.count; wi++) {
+              const wx = posAttr.getX(wi);
+              const wz = posAttr.getZ(wi);
+              posAttr.setY(wi, Math.sin(wx * 0.28 + t * 1.4) * 0.14 + Math.cos(wz * 0.25 + t * 1.1) * 0.12);
+            }
+            posAttr.needsUpdate = true;
+          }
+
+          // Periodic shooting stars across the sky
+          const nowMs = Date.now();
+          if (nowMs > nextMeteorAt) {
+            nextMeteorAt = nowMs + 3200 + Math.random() * 4200;
+            spawnShootingStar();
+          }
+          for (let mi = shootingStars.length - 1; mi >= 0; mi--) {
+            const ms = shootingStars[mi];
+            ms.position.x += ms.userData.vx;
+            ms.position.y += ms.userData.vy;
+            ms.userData.life -= 0.022;
+            ms.material.opacity = Math.max(0, ms.userData.life);
+            if (ms.userData.life <= 0) {
+              scene.remove(ms);
+              shootingStars.splice(mi, 1);
+            }
+          }
+
+          // Animate 3D spherical sky fireworks
+          for (let fi = fireworkBursts.length - 1; fi >= 0; fi--) {
+            const fw = fireworkBursts[fi];
+            const attr = fw.geometry.attributes.position;
+            const vels = fw.userData.vels;
+            for (let pi = 0; pi < vels.length; pi++) {
+              attr.setXYZ(
+                pi,
+                attr.getX(pi) + vels[pi].x,
+                attr.getY(pi) + vels[pi].y,
+                attr.getZ(pi) + vels[pi].z
+              );
+              vels[pi].x *= 0.975;
+              vels[pi].y = vels[pi].y * 0.975 - 0.0022;
+              vels[pi].z *= 0.975;
+            }
+            attr.needsUpdate = true;
+            fw.userData.life -= 0.018;
+            fw.material.opacity = Math.max(0, fw.userData.life);
+            if (fw.userData.life <= 0) {
+              scene.remove(fw);
+              fireworkBursts.splice(fi, 1);
+            }
+          }
+
+          // Animate cursor magic stardust sparks
+          for (let ci = cursorSparks.length - 1; ci >= 0; ci--) {
+            const sp = cursorSparks[ci];
+            sp.position.x += sp.userData.vx;
+            sp.position.y += sp.userData.vy;
+            sp.position.z += sp.userData.vz;
+            sp.rotation.y += 0.12;
+            sp.userData.life -= 0.032;
+            sp.material.opacity = Math.max(0, sp.userData.life);
+            sp.scale.setScalar(Math.max(0.01, sp.userData.life));
+            if (sp.userData.life <= 0) {
+              scene.remove(sp);
+              cursorSparks.splice(ci, 1);
+            }
+          }
+
+          if (cakeOrbitRing && cakeGroup && cakeGroup.visible) {
+            cakeOrbitRing.rotation.y += 0.007;
+          }
+
+          if (boxLightBeam && giftGroup && giftGroup.visible) {
+            const targetOp = state.boxOpen ? 0.24 : 0;
+            boxLightBeam.material.opacity += (targetOp - boxLightBeam.material.opacity) * 0.07;
+            boxLightBeam.rotation.y += 0.01;
+          }
+
+          // Animate Priya's released 3D Wish Lanterns with sparkling golden trails
+          for (let wi = wishLanterns.length - 1; wi >= 0; wi--) {
+            const wl = wishLanterns[wi];
+            wl.position.y += wl.userData.riseSpeed;
+            wl.position.x += wl.userData.driftX + Math.sin(t * 1.2 + wl.userData.phase) * 0.012;
+            wl.position.z += wl.userData.driftZ;
+            wl.rotation.y += 0.01;
+            if (Math.random() < 0.35 && cursorSparks.length < 55) {
+              const em = new THREE.Mesh(
+                new THREE.OctahedronGeometry(0.06, 0),
+                new THREE.MeshBasicMaterial({ color: 0xffe49e, transparent: true, opacity: 0.9 })
+              );
+              em.position.set(
+                wl.position.x + (Math.random() - 0.5) * 0.4,
+                wl.position.y - 0.55,
+                wl.position.z + (Math.random() - 0.5) * 0.4
+              );
+              em.userData = { vx: (Math.random() - 0.5) * 0.015, vy: -0.012, vz: (Math.random() - 0.5) * 0.015, life: 1 };
+              scene.add(em);
+              cursorSparks.push(em);
+            }
+            if (wl.position.y > 14) {
+              scene.remove(wl);
+              wishLanterns.splice(wi, 1);
+            }
+          }
+
+          // Rising Sky Lanterns with warm candle flicker & gentle breeze sway
+          skyLanterns.forEach((l) => {
+            const u = l.userData;
+            l.position.y += u.riseSpeed;
+            if (l.position.y > 9.5) l.position.y = -8.5;
+            l.position.x = u.baseX + Math.sin(t * 0.65 + u.phase) * 0.42 + lanternBreeze.x * 0.5;
+            l.position.z = u.baseZ + Math.cos(t * 0.55 + u.phase) * 0.3;
+            l.rotation.z = Math.sin(t * 0.8 + u.phase) * 0.06;
+            const pulse = 1 + Math.sin(t * 6 + u.phase) * 0.12;
+            u.halo.scale.set(2.35 * pulse, 2.35 * pulse, 1);
+            if (u.flameCore) {
+              u.flameCore.scale.set(1, 1 + Math.sin(t * 11 + u.phase) * 0.18, 1);
+              u.flameCore.rotation.z = Math.sin(t * 8 + u.phase) * 0.12;
+            }
+          });
+
+          // Slowly rising distant festival lanterns across the horizon
+          if (distantLanterns && distantLanterns.geometry) {
+            const dAttr = distantLanterns.geometry.attributes.position;
+            const dSpd = distantLanterns.userData.speeds;
+            for (let di = 0; di < dAttr.count; di++) {
+              let ny = dAttr.getY(di) + dSpd[di];
+              if (ny > 14.5) ny = -4.5;
+              dAttr.setY(di, ny);
+            }
+            dAttr.needsUpdate = true;
+          }
+
+          // Cake candle flicker + smoke
+          if (cakeGroup && cakeGroup.visible) {
+            candleFlames.forEach((fl, i) => {
+              if (!state.candlesLit[i]) return;
+              fl.scale.set(1, 1 + Math.sin(t * 10 + i * 1.9) * 0.15, 1);
+              fl.rotation.z = Math.sin(t * 7 + i) * 0.08;
+              if (candleLights[i]) candleLights[i].intensity = 0.5 + Math.sin(t * 11 + i) * 0.12;
+            });
+
+            for (let s = smokePuffs.length - 1; s >= 0; s--) {
+              const p = smokePuffs[s];
+              p.position.y += p.userData.vy;
+              p.userData.life -= 0.02;
+              p.material.opacity = Math.max(0, p.userData.life * 0.55);
+              p.scale.multiplyScalar(1.015);
+              if (p.userData.life <= 0) {
+                cakeGroup.remove(p);
+                smokePuffs.splice(s, 1);
+              }
+            }
+          }
+
+          // Smooth 3D Gift Lid animation
+          if (giftGroup && giftGroup.visible && giftLidPivot) {
+            const targetLid = state.boxOpen ? -1.85 : 0;
+            giftLidPivot.rotation.x += (targetLid - giftLidPivot.rotation.x) * 0.08;
+            if (giftGlowLight) {
+              giftGlowLight.intensity += ((state.boxOpen ? 2.6 : 0.3) - giftGlowLight.intensity) * 0.08;
+            }
+            giftGroup.position.y = Math.sin(t * 0.9) * 0.12 - (state.boxOpen ? 0.55 : 0);
+          }
+
+          // Floating 3D Balloons & pop burst
+          if (balloonsGroup && balloonsGroup.visible) {
+            balloonItems.forEach((b) => {
+              if (b.userData.popped) return;
+              const ph = b.userData.phase;
+              b.position.y = b.userData.baseY + Math.sin(t * 1.1 + ph) * 0.26;
+              b.position.x = b.userData.baseX + Math.cos(t * 0.7 + ph) * 0.16;
+              b.rotation.z = Math.sin(t * 0.9 + ph) * 0.07;
+            });
+
+            for (let pIdx = popParticles.length - 1; pIdx >= 0; pIdx--) {
+              const pt = popParticles[pIdx];
+              pt.position.x += pt.userData.vx;
+              pt.position.y += pt.userData.vy;
+              pt.position.z += pt.userData.vz;
+              pt.userData.vy -= 0.004;
+              pt.userData.life -= 0.035;
+              pt.material.opacity = Math.max(0, pt.userData.life);
+              pt.scale.multiplyScalar(0.96);
+              if (pt.userData.life <= 0) {
+                balloonsGroup.remove(pt);
+                popParticles.splice(pIdx, 1);
+              }
+            }
+          }
+
+          renderer.render(scene, camera);
+        }
+
+        animate();
+      }
+
+      // =========================================================================
+      // Slide Navigation & Interactions
+      // =========================================================================
+      function unlockCelebration(isSecretPreview) {
+        if (state.timerUnlocked) return;
+        state.timerUnlocked = true;
+        const navDock = document.getElementById('slide-nav-dock');
+        if (navDock) {
+          navDock.classList.remove('hidden');
+          navDock.classList.add('flex');
+        }
+        const openWrap = document.getElementById('birthday-open-wrap');
+        if (openWrap) {
+          openWrap.classList.remove('hidden');
+          openWrap.classList.add('flex');
+        }
+        const badge = document.getElementById('countdown-badge');
+        if (badge) {
+          badge.textContent = isSecretPreview ? 'Preview Mode Active' : "It's Officially Your Birthday!";
+        }
+      }
+
+      function goToSlide(index) {
+        if (!state.timerUnlocked && index > 0) return;
+        const clamped = Math.max(0, Math.min(state.totalSlides - 1, index));
+        state.currentSlide = clamped;
+
+        for (let i = 0; i < state.totalSlides; i++) {
+          const el = document.getElementById(`slide-${i}`);
+          if (el) el.classList.toggle('is-active', i === clamped);
+        }
+
+        if (cakeGroup) cakeGroup.visible = clamped === 1;
+        if (giftGroup) giftGroup.visible = clamped === 2;
+        if (balloonsGroup) balloonsGroup.visible = clamped === 3;
+
+        document.querySelectorAll('.slide-dot').forEach((dot, idx) => {
+          dot.className = idx === clamped
+            ? 'slide-dot h-2.5 w-7 rounded-full bg-[#ffbf59] transition-all'
+            : 'slide-dot h-2.5 w-2.5 rounded-full bg-white/25 transition-all hover:bg-white/50';
+        });
+
+        const counter = document.getElementById('slide-counter-label');
+        if (counter) counter.textContent = `0${clamped + 1} / 0${state.totalSlides}`;
+
+        const prevBtn = document.getElementById('btn-prev-slide');
+        const nextBtn = document.getElementById('btn-next-slide');
+        if (prevBtn) prevBtn.disabled = clamped === 0;
+        if (nextBtn) nextBtn.disabled = clamped === state.totalSlides - 1;
+      }
+
+      function pad2(n) { return String(Math.max(0, Math.floor(n))).padStart(2, '0'); }
+
+      function tickCountdown() {
+        const diff = state.targetTimestamp - Date.now();
+        const dEl = document.getElementById('cd-days');
+        const hEl = document.getElementById('cd-hours');
+        const mEl = document.getElementById('cd-mins');
+        const sEl = document.getElementById('cd-secs');
+
+        if (diff <= 0) {
+          if (dEl) dEl.textContent = '00';
+          if (hEl) hEl.textContent = '00';
+          if (mEl) mEl.textContent = '00';
+          if (sEl) sEl.textContent = '00';
+          if (!state.timerUnlocked) {
+            unlockCelebration(false);
+            fireLanternConfetti(true);
+            playChimeSfx();
+            showToast(`Happy Birthday, ${CONFIG.girlfriendName}!`);
+            if (state.currentSlide === 0) setTimeout(() => goToSlide(1), 850);
+          }
+          return;
+        }
+
+        const totalSec = Math.floor(diff / 1000);
+        if (dEl) dEl.textContent = pad2(Math.floor(totalSec / 86400));
+        if (hEl) hEl.textContent = pad2(Math.floor((totalSec % 86400) / 3600));
+        if (mEl) mEl.textContent = pad2(Math.floor((totalSec % 3600) / 60));
+        if (sEl) sEl.textContent = pad2(totalSec % 60);
+      }
+
+      function syncCandles() {
+        const litCount = state.candlesLit.filter(Boolean).length;
+        const txt = document.getElementById('blow-btn-text');
+        const nextBtn = document.getElementById('btn-to-box');
+        if (txt) txt.textContent = litCount > 0 ? `Blow Out Candles (${litCount}/7)` : 'Relight Candles';
+        if (nextBtn) nextBtn.classList.toggle('hidden', litCount > 0);
+        candleFlames.forEach((fl, i) => {
+          const lit = state.candlesLit[i];
+          fl.visible = lit;
+          if (candleLights[i]) candleLights[i].intensity = lit ? 0.55 : 0;
+        });
+      }
+
+      function extinguishCandle(idx) {
+        if (!state.candlesLit[idx]) return;
+        state.candlesLit[idx] = false;
+        if (candleFlames[idx]) spawnSmoke(candleFlames[idx].position);
+        playPopSfx();
+        syncCandles();
+        if (state.candlesLit.every((v) => !v)) {
+          fireLanternConfetti(true);
+          playChimeSfx();
+          showToast(`Wish sent to the lantern sky, ${CONFIG.girlfriendName}!`);
+        }
+      }
+
+      function blowAllOrRelight() {
+        if (state.candlesLit.some(Boolean)) {
+          state.candlesLit.forEach((lit, i) => {
+            if (lit) setTimeout(() => extinguishCandle(i), i * 80);
+          });
+        } else {
+          state.candlesLit = state.candlesLit.map(() => true);
+          syncCandles();
+          playChimeSfx();
+          showToast('Candles relit!');
+        }
+      }
+
+      function toggleGiftBox(forceState) {
+        state.boxOpen = typeof forceState === 'boolean' ? forceState : !state.boxOpen;
+        const card = document.getElementById('main-letter-card');
+        const btnText = document.getElementById('box-btn-text');
+        if (state.boxOpen) {
+          fireLanternConfetti(true);
+          playChimeSfx();
+          if (card) {
+            card.classList.remove('opacity-0', 'scale-95', 'pointer-events-none');
+            card.classList.add('opacity-100', 'scale-100');
+          }
+          if (btnText) btnText.textContent = 'Close Keepsake Box';
+        } else {
+          if (card) {
+            card.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
+            card.classList.remove('opacity-100', 'scale-100');
+          }
+          if (btnText) btnText.textContent = 'Open Keepsake Box';
+        }
+      }
+
+      function renderPoppedTray() {
+        const tray = document.getElementById('popped-letters-tray');
+        const prog = document.getElementById('notes-progress');
+        const resetBtn = document.getElementById('btn-reset-balloons');
+        if (prog) prog.textContent = `${state.openedNotes.size} of ${CONFIG.smallLoveLetters.length} Balloons Popped`;
+        if (resetBtn) resetBtn.classList.toggle('hidden', state.openedNotes.size === 0);
+        if (!tray) return;
+        tray.innerHTML = '';
+
+        Array.from(state.openedNotes).forEach((idx) => {
+          const note = CONFIG.smallLoveLetters[idx];
+          if (!note) return;
+          const pill = document.createElement('button');
+          pill.type = 'button';
+          pill.className = 'inline-flex items-center gap-1 rounded-full border border-[#ffbf59]/40 bg-[#0c1229]/85 px-3 py-1 text-[11px] font-medium text-[#ffda94] backdrop-blur-md transition hover:border-[#ffbf59] hover:bg-[#ffbf59]/20';
+          const starSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-3 w-3 shrink-0 text-[#ffbf59]" aria-hidden="true"><path d="M12 2l2.4 7.2H22l-6.2 4.5 2.4 7.3L12 16.5 5.8 21l2.4-7.3L2 9.2h7.6z"/></svg>';
+          pill.innerHTML = starSvg + '<span></span>';
+          pill.querySelector('span').textContent = note.title;
+          pill.addEventListener('click', () => openNoteModal(idx));
+          tray.appendChild(pill);
+        });
+      }
+
+      function openNoteModal(idx) {
+        state.openedNotes.add(idx);
+        const note = CONFIG.smallLoveLetters[idx];
+        const modal = document.getElementById('note-modal');
+        document.getElementById('modal-note-tag').textContent = note.tag;
+        document.getElementById('modal-note-title').textContent = note.title;
+        document.getElementById('modal-note-body').textContent = note.body;
+        document.getElementById('modal-note-sign').textContent = CONFIG.senderName;
+        if (modal) {
+          modal.classList.remove('hidden');
+          modal.classList.add('flex');
+        }
+        playChimeSfx();
+        renderPoppedTray();
+      }
+
+      function closeNoteModal() {
+        const modal = document.getElementById('note-modal');
+        if (modal) {
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+        }
+      }
+
+      function buildPhotoInnerHTML(item, compact) {
+        if (item.url && item.url.trim()) {
+          return `<img src="${item.url.trim()}" alt="${item.caption}" class="h-full w-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                  <div style="display:none; background:${item.gradient}" class="h-full w-full flex-col items-center justify-center p-4 text-center text-white/90">
+                    <span class="font-hand text-2xl">${item.caption}</span>
+                  </div>`;
+        }
+        return `
+          <div style="background:${item.gradient}" class="flex h-full w-full flex-col items-center justify-center p-4 text-center text-white">
+            <svg viewBox="0 0 64 64" class="${compact ? 'h-8 w-8' : 'h-12 w-12'} mb-2 opacity-90" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M32 10l5 16h17l-14 10 5 16-13-10-13 10 5-16-14-10h17z" fill="rgba(255,240,200,0.28)"/>
+            </svg>
+            <span class="font-hand ${compact ? 'text-lg' : 'text-2xl'} leading-tight text-[#fff5d6]">${item.caption}</span>
+          </div>
+        `;
+      }
+
+      function renderActivePolaroid() {
+        const item = CONFIG.polaroids[state.polaroidIdx];
+        const frame = document.getElementById('polaroid-photo-frame');
+        const cap = document.getElementById('polaroid-caption');
+        const dt = document.getElementById('polaroid-date');
+        const note = document.getElementById('polaroid-back-note');
+        const counter = document.getElementById('pol-counter');
+        const inner = document.getElementById('polaroid-inner');
+
+        if (frame) frame.innerHTML = buildPhotoInnerHTML(item, false);
+        if (cap) cap.textContent = item.caption;
+        if (dt) dt.textContent = item.date;
+        if (note) note.textContent = item.note;
+        if (counter) counter.textContent = `${state.polaroidIdx + 1} / ${CONFIG.polaroids.length}`;
+        if (inner) inner.classList.toggle('is-flipped', state.polaroidFlipped);
+      }
+
+      function renderPolaroidWall() {
+        const wall = document.getElementById('polaroid-wall-view');
+        if (!wall) return;
+        wall.innerHTML = '';
+        const tilts = ['-2deg', '1.8deg', '-1.2deg', '2.2deg', '-1.8deg', '1.4deg'];
+        CONFIG.polaroids.forEach((item, idx) => {
+          const card = document.createElement('button');
+          card.type = 'button';
+          card.style.transform = `rotate(${tilts[idx % tilts.length]})`;
+          card.className = 'group flex flex-col rounded-md bg-[#fdf9f0] p-2.5 pb-3 text-left shadow-xl transition hover:z-10 hover:scale-105 hover:rotate-0';
+          card.innerHTML = `
+            <div class="h-28 w-full overflow-hidden rounded-sm sm:h-32">${buildPhotoInnerHTML(item, true)}</div>
+            <div class="mt-2 flex items-end justify-between gap-1">
+              <span class="font-hand truncate text-lg leading-none text-[#231c16]">${item.caption}</span>
+              <span class="font-mono-tech text-[9px] text-[#7a6855]">${item.date}</span>
+            </div>
+          `;
+          card.addEventListener('click', () => {
+            state.polaroidIdx = idx;
+            state.polaroidFlipped = false;
+            setPolaroidView('deck');
+            renderActivePolaroid();
+          });
+          wall.appendChild(card);
+        });
+      }
+
+      function setPolaroidView(mode) {
+        state.polaroidView = mode;
+        const deckEl = document.getElementById('polaroid-deck-view');
+        const wallEl = document.getElementById('polaroid-wall-view');
+        const btnDeck = document.getElementById('btn-view-deck');
+        const btnWall = document.getElementById('btn-view-wall');
+
+        if (deckEl) deckEl.classList.toggle('hidden', mode !== 'deck');
+        if (wallEl) wallEl.classList.toggle('hidden', mode !== 'wall');
+
+        if (btnDeck) {
+          btnDeck.className = mode === 'deck'
+            ? 'rounded-full bg-[#ffbf59] px-3.5 py-1 text-xs font-bold text-[#16100a] transition'
+            : 'rounded-full px-3.5 py-1 text-xs font-semibold text-[#b9c1d9] transition hover:text-white';
+        }
+        if (btnWall) {
+          btnWall.className = mode === 'wall'
+            ? 'rounded-full bg-[#ffbf59] px-3.5 py-1 text-xs font-bold text-[#16100a] transition'
+            : 'rounded-full px-3.5 py-1 text-xs font-semibold text-[#b9c1d9] transition hover:text-white';
+        }
+      }
+
+      function hydrateConfig() {
+        document.getElementById('top-title').textContent = `For ${CONFIG.girlfriendName}`;
+        document.getElementById('timer-gf-name').textContent = CONFIG.girlfriendName;
+        document.getElementById('cake-gf-name').textContent = CONFIG.girlfriendName;
+        document.getElementById('main-letter-heading').textContent = `Dearest ${CONFIG.girlfriendName},`;
+        document.getElementById('main-letter-sign').textContent = CONFIG.senderName;
+
+        const targetDate = new Date(CONFIG.birthdayDateISO);
+        if (!isNaN(targetDate.getTime())) {
+          document.getElementById('timer-target-label').textContent = `Unlocks on ${targetDate.toLocaleString()}`;
+        }
+
+        const letterBody = document.getElementById('main-letter-body');
+        if (letterBody) {
+          letterBody.innerHTML = CONFIG.mainBirthdayLetter.map((p) => `<p>${p}</p>`).join('');
+        }
+      }
+
+      function bindEvents() {
+        // Point 3: Welcome Curtain — dark until button click, then warm light-up + music fade-in (no confetti or SFX)
+        const curtain = document.getElementById('welcome-curtain');
+        const dismissCurtain = () => {
+          if (!curtain || curtain.classList.contains('is-dismissed') || curtain.classList.contains('is-lighting')) return;
+          curtain.classList.add('is-lighting');
+          startMusic();
+          setTimeout(() => {
+            curtain.classList.add('is-dismissed');
+          }, 260);
+        };
+        document.getElementById('btn-enter-curtain')?.addEventListener('click', (e) => {
+          e.stopPropagation();
+          dismissCurtain();
+        });
+
+        // Point 4: Release a Wish Lantern modal bindings
+        const wishModal = document.getElementById('wish-modal');
+        const wishInput = document.getElementById('wish-lantern-input');
+        const closeWishModal = () => {
+          if (wishModal) {
+            wishModal.classList.add('hidden');
+            wishModal.classList.remove('flex');
+          }
+        };
+        document.getElementById('btn-open-wish-modal')?.addEventListener('click', () => {
+          if (wishModal) {
+            wishModal.classList.remove('hidden');
+            wishModal.classList.add('flex');
+            setTimeout(() => wishInput?.focus(), 60);
+          }
+        });
+        document.getElementById('btn-close-wish-modal')?.addEventListener('click', closeWishModal);
+        wishModal?.addEventListener('click', (e) => {
+          if (e.target.id === 'wish-modal') closeWishModal();
+        });
+        document.getElementById('wish-lantern-form')?.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const txt = (wishInput?.value || '').trim();
+          if (!txt) return;
+          if (wishInput) wishInput.value = '';
+          closeWishModal();
+          launchWishLantern(txt);
+          sendWishToEmail(txt);
+          showToast('Your wish lantern is rising into the sky!');
+        });
+
+        document.getElementById('btn-music-toggle')?.addEventListener('click', (e) => {
+          e.stopPropagation();
+          toggleMusic();
+        });
+
+        document.getElementById('btn-zoom-in')?.addEventListener('click', (e) => {
+          e.stopPropagation();
+          camTargetZoomOffset = Math.max(-5.5, camTargetZoomOffset - 1.8);
+        });
+        document.getElementById('btn-zoom-out')?.addEventListener('click', (e) => {
+          e.stopPropagation();
+          camTargetZoomOffset = Math.min(7.5, camTargetZoomOffset + 1.8);
+        });
+
+        document.getElementById('btn-birthday-enter')?.addEventListener('click', () => {
+          fireLanternConfetti(true);
+          playChimeSfx();
+          goToSlide(1);
+        });
+
+        // Secret testing bypass ONLY for Ritu: tap "For Priya" 10 times within 3 seconds, or add ?preview=ritu14 to URL
+        let secretTaps = [];
+        document.getElementById('secret-unlock-trigger')?.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const now = Date.now();
+          secretTaps = secretTaps.filter((ts) => now - ts <= 3000);
+          secretTaps.push(now);
+          if (secretTaps.length >= 10) {
+            secretTaps = [];
+            unlockCelebration(true);
+            showToast('Secret preview unlocked for Ritu!');
+            goToSlide(1);
+          }
+        });
+
+        // Also allow secret URL query ?preview=ritu14 for instant testing
+        try {
+          const params = new URLSearchParams(window.location.search);
+          if (params.get('preview') === CONFIG.secretPreviewKey) {
+            unlockCelebration(true);
+          }
+        } catch (err) {}
+
+        document.getElementById('btn-blow-candles')?.addEventListener('click', blowAllOrRelight);
+        document.getElementById('btn-cake-confetti')?.addEventListener('click', () => {
+          fireLanternConfetti(true);
+          playChimeSfx();
+        });
+        document.getElementById('btn-to-box')?.addEventListener('click', () => goToSlide(2));
+
+        document.getElementById('btn-toggle-box')?.addEventListener('click', () => toggleGiftBox());
+        document.getElementById('btn-close-letter')?.addEventListener('click', () => toggleGiftBox(false));
+        document.getElementById('btn-to-balloons')?.addEventListener('click', () => goToSlide(3));
+
+        document.getElementById('btn-reset-balloons')?.addEventListener('click', resetBalloons);
+        document.getElementById('btn-to-polaroids')?.addEventListener('click', () => goToSlide(4));
+
+        document.getElementById('btn-close-note-modal')?.addEventListener('click', closeNoteModal);
+        document.getElementById('btn-next-note')?.addEventListener('click', closeNoteModal);
+        document.getElementById('note-modal')?.addEventListener('click', (e) => {
+          if (e.target.id === 'note-modal') closeNoteModal();
+        });
+
+        const polEl = document.getElementById('active-polaroid');
+        let polTouchStartX = null;
+        let polTouchStartY = null;
+        let polDidSwipe = false;
+
+        function animatePolaroidStep(dir) {
+          if (!polEl) return;
+          polEl.style.transform = `translateX(${dir * -48}px) rotate(${dir * -6}deg)`;
+          polEl.style.opacity = '0.35';
+          setTimeout(() => {
+            state.polaroidFlipped = false;
+            state.polaroidIdx = (state.polaroidIdx + dir + CONFIG.polaroids.length) % CONFIG.polaroids.length;
+            renderActivePolaroid();
+            polEl.style.transform = `translateX(${dir * 32}px) rotate(${dir * 4}deg)`;
+            requestAnimationFrame(() => {
+              polEl.style.transform = 'translateX(0) rotate(0deg)';
+              polEl.style.opacity = '1';
+            });
+          }, 150);
+        }
+
+        polEl?.addEventListener('touchstart', (e) => {
+          if (e.touches.length !== 1) return;
+          polTouchStartX = e.touches[0].clientX;
+          polTouchStartY = e.touches[0].clientY;
+          polDidSwipe = false;
+        }, { passive: true });
+
+        polEl?.addEventListener('touchmove', (e) => {
+          if (polTouchStartX === null || e.touches.length !== 1) return;
+          const dx = e.touches[0].clientX - polTouchStartX;
+          const dy = e.touches[0].clientY - polTouchStartY;
+          if (Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy)) {
+            polDidSwipe = true;
+            polEl.style.transform = `translateX(${dx * 0.45}px) rotate(${dx * 0.04}deg)`;
+          }
+        }, { passive: true });
+
+        polEl?.addEventListener('touchend', (e) => {
+          if (polTouchStartX === null) return;
+          const endX = e.changedTouches[0].clientX;
+          const dx = endX - polTouchStartX;
+          polTouchStartX = null;
+          polTouchStartY = null;
+          if (polDidSwipe && Math.abs(dx) > 45) {
+            animatePolaroidStep(dx < 0 ? 1 : -1);
+          } else {
+            polEl.style.transform = 'translateX(0) rotate(0deg)';
+          }
+        });
+
+        polEl?.addEventListener('click', () => {
+          if (polDidSwipe) { polDidSwipe = false; return; }
+          state.polaroidFlipped = !state.polaroidFlipped;
+          renderActivePolaroid();
+        });
+        document.getElementById('btn-pol-flip')?.addEventListener('click', () => {
+          state.polaroidFlipped = !state.polaroidFlipped;
+          renderActivePolaroid();
+        });
+        document.getElementById('btn-pol-prev')?.addEventListener('click', () => {
+          state.polaroidFlipped = false;
+          state.polaroidIdx = (state.polaroidIdx - 1 + CONFIG.polaroids.length) % CONFIG.polaroids.length;
+          renderActivePolaroid();
+        });
+        document.getElementById('btn-pol-next')?.addEventListener('click', () => {
+          state.polaroidFlipped = false;
+          state.polaroidIdx = (state.polaroidIdx + 1) % CONFIG.polaroids.length;
+          renderActivePolaroid();
+        });
+        document.getElementById('btn-view-deck')?.addEventListener('click', () => setPolaroidView('deck'));
+        document.getElementById('btn-view-wall')?.addEventListener('click', () => setPolaroidView('wall'));
+
+        document.getElementById('btn-prev-slide')?.addEventListener('click', () => goToSlide(state.currentSlide - 1));
+        document.getElementById('btn-next-slide')?.addEventListener('click', () => goToSlide(state.currentSlide + 1));
+        document.querySelectorAll('.slide-dot').forEach((dot) => {
+          dot.addEventListener('click', () => {
+            const idx = Number(dot.getAttribute('data-slide'));
+            if (!isNaN(idx)) goToSlide(idx);
+          });
+        });
+
+        window.addEventListener('keydown', (e) => {
+          if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName || '')) {
+            if (e.key === 'Escape') closeWishModal();
+            return;
+          }
+          if (e.key === 'ArrowRight') goToSlide(state.currentSlide + 1);
+          if (e.key === 'ArrowLeft') goToSlide(state.currentSlide - 1);
+          if (e.code === 'Space' && state.currentSlide === 1) {
+            e.preventDefault();
+            blowAllOrRelight();
+          }
+          if (e.key === 'Escape') {
+            closeNoteModal();
+            closeWishModal();
+          }
+        });
+      }
+
+      window.addEventListener('load', () => {
+        hydrateConfig();
+        init3DStage();
+        syncCandles();
+        renderPoppedTray();
+        renderActivePolaroid();
+        renderPolaroidWall();
+        bindEvents();
+        goToSlide(0);
+        tickCountdown();
+        setInterval(tickCountdown, 250);
+      });
+    })();
+  </script>
+</body>
+</html>
